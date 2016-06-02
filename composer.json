@@ -6,14 +6,6 @@
 			"email" : "kwasi.gyasiagyei@edged.co.za"
 		}
 	],
-	"repositories" : [{
-			"type" : "composer",
-			"url" : "http://toran.edged.co.za/repo/private/"
-		}, {
-			"type" : "composer",
-			"url" : "http://toran.edged.co.za/repo/packagist/"
-		}
-	],
 	"autoload" : {
 		"psr-0" : {
 			"Edged\\" : "src/"
@@ -35,12 +27,7 @@
 	},
 	"config" : {
 		"bin-dir" : "bin",
-		"http-basic" : {
-			"toran.edged.co.za" : {
-				"username" : "git",
-				"password" : "ba5Eimah"
-			}
-		}
+		"secure-http": false
 	},
 	"keywords" : [
 		"Mulungu",
