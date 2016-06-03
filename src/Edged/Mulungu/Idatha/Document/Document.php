@@ -113,6 +113,7 @@ abstract class Document extends \stdClass implements DocumentInterface{
 
         $this->eventDispatcher->dispatch(DocumentEvents::AFTER_UPDATE, new DocumentEvent($this));
 
+
         return true;
     }
 
@@ -140,6 +141,13 @@ abstract class Document extends \stdClass implements DocumentInterface{
 
         $this->eventDispatcher->dispatch(DocumentEvents::AFTER_PATCH, new DocumentDataEvent($data));
 
+
+        //merge data set, typical only _id,_rev,_key are returned from save operation
+        $mergedResults = array_merge( $data, $results );
+        //remove error key, that is not needed on object
+        unset( $mergedResults["error"] );
+
+        $this->hydrateFromArray( $mergedResults );
 
         return true;
     }
