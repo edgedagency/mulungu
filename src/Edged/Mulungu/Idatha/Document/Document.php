@@ -123,6 +123,8 @@ abstract class Document extends \stdClass implements DocumentInterface{
      * @return bool
      */
     public function patch( $id, array $data  ){
+        $data = $this->clean( $data );
+        
         $data[ "modifiedDate" ] = Carbon::now()->toIso8601String();
 
         $this->eventDispatcher->dispatch(DocumentEvents::BEFORE_PATCH, new DocumentDataEvent($data));
@@ -249,6 +251,7 @@ abstract class Document extends \stdClass implements DocumentInterface{
         return $this;
     }
 
+
     public function setCollection( $collection ){
         $this->collection = $collection;
 
@@ -292,6 +295,13 @@ abstract class Document extends \stdClass implements DocumentInterface{
 
         }
     }
+
+    private function clean( $data ){
+        //removes elements that shouldn't be saved
+        unset( $data["_key"], $data["_id"], $data["_rev"] );
+        return $data;
+    }
+
 
     private function getId( $value ){
 
