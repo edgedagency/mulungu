@@ -3,7 +3,7 @@ Package idatha mulungu provides a set of functions need to communicate with an a
 */
 package idatha
 
-import "edged.agency/mulungu"
+import "github.com/edgedagency/mulungu"
 
 //Connection currently established connection
 var connection *mulungu.Connection

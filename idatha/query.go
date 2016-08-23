@@ -1,6 +1,6 @@
 package idatha
 
-import "edged.agency/mulungu"
+import "github.com/edgedagency/mulungu"
 
 // Query used to generate executable query
 type Query struct {
