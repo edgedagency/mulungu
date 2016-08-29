@@ -3,35 +3,38 @@ Package idatha mulungu provides a set of functions need to communicate with an a
 */
 package idatha
 
-import "github.com/edgedagency/mulungu"
+import (
+	"fmt"
+	"net/http"
 
-//Connection currently established connection
-var connection *mulungu.Connection
-var err error
+	"github.com/edgedagency/mulungu"
+)
 
-func init() {
-	connection, err = mulungu.NewConnection("http://127.0.0.1:8529", "root", "root")
-	if err != nil {
-		panic(err)
+//Collection representation of a collection
+type Collection struct {
+	data map[string]interface{}
+}
+
+// Hydrate receives a map with string values which is used to hydrate KeyValue field of collection
+func (c *Collection) Hydrate(data map[string]interface{}) {
+	//initiate KeyValue store
+	c.data = make(map[string]interface{})
+	for key, value := range data {
+		c.data[key] = value
 	}
 }
 
-// Collection is a respresentation of an arangodb collection
-// will allow interaction with arangodb to perform CRUD and enable execution of AQL commands.
-type Collection struct {
-	ID  string `json:"_id"`
-	Key string `json:"_key"`
-	Rev string `json:"_rev"`
-	//query Query
-	Data interface{}
-}
-
-func (c *Collection) hydrate(data map[string]interface{}) {
-
-}
-
 // Save collection object into database.
-func (c *Collection) Save(data map[string]interface{}) error {
+func (c *Collection) Save(data map[string]interface{}, database, collection string) error {
+	fmt.Println("Collection save invoked")
+	connection, _ := mulungu.NewConnection("http://127.0.0.1:8529", "root", "root")
+	results, err := connection.Execute(http.MethodPost, new(Dialect).Create(database, collection), data)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(results)
 
 	return nil
 }
@@ -42,11 +45,16 @@ func (c *Collection) Delete() error {
 }
 
 // Update updates am existing collection object in database
-func (c *Collection) Update(data map[string]interface{}, override bool) error {
+func (c *Collection) Update(data map[string]interface{}, patch bool) error {
+	if data != nil {
+		c.Hydrate(data)
+	}
+	//depending on patch true or false/nil update or run patch function
 	return nil
 }
 
 // NewQuery creates a new query object with current connection
 func (c *Collection) NewQuery() *Query {
+	connection, _ := mulungu.NewConnection("http://127.0.0.1:8529", "root", "root")
 	return &Query{Connection: connection}
 }

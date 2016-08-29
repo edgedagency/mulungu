@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"log"
 	"net/http"
+
+	"github.com/edgedagency/mulungu/util"
 )
 
 // Connection is a structure which will be used to represent a connection
@@ -19,9 +21,6 @@ type Connection struct {
 
 // NewConnection creates connection and returns &pointer to refrence to this connection.
 func NewConnection(host, username, password string) (connection *Connection, err error) {
-
-	var results map[string]interface{}
-
 	connection = &Connection{Host: host, Username: username, Password: password}
 	connection.Client = new(http.Client)
 
@@ -36,21 +35,7 @@ func NewConnection(host, username, password string) (connection *Connection, err
 		panic("failed to establish connection")
 	}
 
-	defer res.Body.Close()
-
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, errors.New("failed to read content from body")
-	}
-
-	err = json.Unmarshal(b, &results)
-	if err != nil {
-		return nil, errors.New("failed to Unmarshal json results")
-	}
-
-	fmt.Println("---------------------")
-	fmt.Println("raw results", results)
-	fmt.Println("---------------------")
+	results := util.JSONDecodeHTTPResponse(res).(map[string]interface{})
 
 	errorNum, hasKey := results["errorNum"]
 	if hasKey == true {
@@ -62,10 +47,11 @@ func NewConnection(host, username, password string) (connection *Connection, err
 }
 
 // Execute will run abitary command on current connection.
-func (c *Connection) Execute(statement map[string]interface{}) (results map[string]interface{}, err error) {
+func (c *Connection) Execute(httpMethod, endpoint string, statement map[string]interface{}) (results map[string]interface{}, err error) {
+	compliedStatement, err := json.Marshal(statement)
+	requestEndPoint := fmt.Sprintf("%s%s", c.Host, endpoint)
 
-	compiledStatement, _ := json.Marshal(statement)
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s%s", c.Host, "/_api/cursor"), bytes.NewBuffer(compiledStatement))
+	req, err := http.NewRequest(httpMethod, requestEndPoint, bytes.NewBuffer(compliedStatement))
 
 	if err != nil {
 		return nil, errors.New("Failed to create a request : " + err.Error())
@@ -74,28 +60,19 @@ func (c *Connection) Execute(statement map[string]interface{}) (results map[stri
 	req.Header.Set("Content-Type", "application/json")
 	req.SetBasicAuth(c.Username, c.Password)
 
+	log.Printf("Executing query EndPoint:%s Host:%s Statement:%s ", requestEndPoint, c.Host, compliedStatement)
+
 	res, err := c.Client.Do(req)
 
 	if err != nil {
 		return nil, errors.New("Failed to run request : " + err.Error())
 	}
 
-	defer res.Body.Close()
-
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, errors.New("unable to read data from response : " + err.Error())
-	}
-
-	err = json.Unmarshal(b, &results)
-
-	if err != nil {
-		fmt.Println("Unmarshal of response body failed", err)
-	}
+	results = util.JSONDecodeHTTPResponse(res).(map[string]interface{})
 
 	errorNum, hasKey := results["errorNum"]
 	if hasKey == true {
-		errorString, _ := fmt.Printf("Failed to execute query Query:%s Host:%s ErrorNum:%g ErrorMsg:%s ", compiledStatement, c.Host, errorNum, results["errorMessage"])
+		errorString, _ := fmt.Printf("Failed to execute query EndPoint:%s Host:%s ErrorNum:%g ErrorMsg:%s Statement:%s ", endpoint, c.Host, errorNum, results["errorMessage"], compliedStatement)
 		return nil, errors.New(string(errorString))
 	}
 

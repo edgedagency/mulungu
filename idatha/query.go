@@ -1,6 +1,10 @@
 package idatha
 
-import "github.com/edgedagency/mulungu"
+import (
+	"net/http"
+
+	"github.com/edgedagency/mulungu"
+)
 
 // Query used to generate executable query
 type Query struct {
@@ -34,8 +38,8 @@ func (q *Query) Filter(left, operator, right string) {
 }
 
 // Execute execute abitary statement on current connection
-func (q *Query) Execute(statement map[string]interface{}) (response map[string]interface{}, err error) {
-	results, err := q.Connection.Execute(statement)
+func (q *Query) Execute(database string, statement map[string]interface{}) (response map[string]interface{}, err error) {
+	results, err := q.Connection.Execute(http.MethodPost, new(Dialect).Cursor(database), statement)
 	if err != nil {
 		return results, err
 	}
