@@ -1,31 +1,68 @@
 package util
 
 import (
+	"crypto/md5"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
+	"errors"
 	"log"
 	"net/http"
+	"strings"
 )
 
 // JSONDecode converts bytes to map[string]interface{} specified
-func JSONDecode(b []byte) interface{} {
+func JSONDecode(b []byte) (map[string]interface{}, error) {
 	results := make(map[string]interface{})
 	err := json.Unmarshal(b, &results)
+
 	if err != nil {
-		log.Println("failed to unmarshal object")
-		return nil
+		return nil, errors.New("Failed to decode data")
 	}
-	fmt.Println(results)
-	return results
+
+	return results, nil
 }
 
-// JSONDecodeHTTPResponse Unmarshal http.Reponse.Body to interface
-func JSONDecodeHTTPResponse(res *http.Response) interface{} {
-	defer res.Body.Close()
-	b, err := ioutil.ReadAll(res.Body)
+// JSONDecodeHTTPRequest Unmarshal http.Request.Body to interface
+func JSONDecodeHTTPRequest(r *http.Request) (map[string]interface{}, error) {
+	defer r.Body.Close()
+	results := make(map[string]interface{})
+	err := json.NewDecoder(r.Body).Decode(&results)
 	if err != nil {
-		fmt.Println("failed to read response body")
+		return nil, errors.New("Failed to decode http request")
 	}
-	return JSONDecode(b)
+	return results, nil
+}
+
+// JSONDecodeHTTPResponse Unmarshal http.Request.Body to interface
+func JSONDecodeHTTPResponse(r *http.Response) (map[string]interface{}, error) {
+	defer r.Body.Close()
+	results := make(map[string]interface{})
+	err := json.NewDecoder(r.Body).Decode(&results)
+	if err != nil {
+		return nil, errors.New("Failed to decode http response")
+	}
+	return results, nil
+}
+
+//MD5Hash Hash encode string
+func MD5Hash(text string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(text))
+	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+//BasicAuthUsernamePassword returns username and password from basic auth base64 encoded string
+func BasicAuthUsernamePassword(base64Encoded string) (username, password string, err error) {
+	if len(base64Encoded) <= 0 {
+		return "", "", errors.New("empty string provided")
+	}
+	data, err := base64.StdEncoding.DecodeString(base64Encoded)
+	if err != nil {
+		log.Fatal("error:", err)
+		return "", "", errors.New("Failed to decode string")
+	}
+	usernameAndPassword := strings.Split(string(data), ":")
+
+	return usernameAndPassword[0], usernameAndPassword[1], nil
 }

@@ -15,7 +15,7 @@ func (d *Dialect) Find(database, collection, key string) string {
 
 // Create returns create URL endpoint
 func (d *Dialect) Create(database, collection string) string {
-	dialect := fmt.Sprintf("/_db/%s/_api/document?collection=%s", database, collection)
+	dialect := fmt.Sprintf("/_db/%s/_api/document?collection=%s&createCollection=true", database, collection)
 	fmt.Printf("dialect: %s database: %s collection: %s", dialect, database, collection)
 	return dialect
 }
@@ -33,4 +33,11 @@ func (d *Dialect) Cursor(database string) string {
 // Version returns endpoint to obtain version
 func (d *Dialect) Version() string {
 	return "/_api/version?details=true"
+}
+
+/**Database Operations**/
+
+// CreateDatabase endpoint for creating new database
+func (d *Dialect) CreateDatabase() string {
+	return "/_api/database"
 }

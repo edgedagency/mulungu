@@ -4,7 +4,7 @@ Package idatha mulungu provides a set of functions need to communicate with an a
 package idatha
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 
 	"github.com/edgedagency/mulungu"
@@ -25,18 +25,15 @@ func (c *Collection) Hydrate(data map[string]interface{}) {
 }
 
 // Save collection object into database.
-func (c *Collection) Save(data map[string]interface{}, database, collection string) error {
-	fmt.Println("Collection save invoked")
-	connection, _ := mulungu.NewConnection("http://127.0.0.1:8529", "root", "root")
+func (c *Collection) Save(data map[string]interface{}, database, collection string) (map[string]interface{}, error) {
+	connection := mulungu.NewConnection("http://127.0.0.1:8529", "root", "root")
 	results, err := connection.Execute(http.MethodPost, new(Dialect).Create(database, collection), data)
 
 	if err != nil {
-		return err
+		return nil, errors.New("failed to save collection")
 	}
 
-	fmt.Println(results)
-
-	return nil
+	return results, nil
 }
 
 // Delete removes collection object from database.
@@ -55,6 +52,6 @@ func (c *Collection) Update(data map[string]interface{}, patch bool) error {
 
 // NewQuery creates a new query object with current connection
 func (c *Collection) NewQuery() *Query {
-	connection, _ := mulungu.NewConnection("http://127.0.0.1:8529", "root", "root")
+	connection := mulungu.NewConnection("http://127.0.0.1:8529", "root", "root")
 	return &Query{Connection: connection}
 }
