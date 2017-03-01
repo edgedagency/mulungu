@@ -14,12 +14,12 @@ import (
 //Model element used to interact with datastore
 type Model struct {
 	Key          *datastore.Key  `json:"key,omitempty" datastore:"__key__,omitempty"`
-	ID           int64           `json:"id,omitempty" datastore:"_,omitempty"`
+	ID           int64           `json:"id,omitempty" datastore:"-"`
 	CreatedDate  time.Time       `json:"createdDate" datastore:"createdDate,omitempty"`
 	ModifiedDate time.Time       `json:"modifiedDate" datastore:"modifiedDate,omitempty"`
-	Namespace    string          `json:"_" datastore:"_"`
-	Kind         string          `json:"_" datastore:"_"`
-	Context      context.Context `json:"_" datastore:"_"`
+	Namespace    string          `json:"-" datastore:"-"`
+	Kind         string          `json:"-" datastore:"-"`
+	Context      context.Context `json:"-" datastore:"-"`
 }
 
 //GetKey generates new key
@@ -46,10 +46,17 @@ func (m *Model) Hydrate(readCloser io.ReadCloser, i interface{}) error {
 	return nil
 }
 
-// //GetModel retuens this model
-// func (m *Model) GetModel() *Model {
-// 	return m
-// }
+//UnMarshal uses one interface to populate another
+func (m *Model) UnMarshal(src interface{}, dest interface{}) error {
+	log.Debugf(m.Context, "UnMarshalling src%#v, dest:%#v", src, dest)
+	bytes, err := json.Marshal(src)
+	if err != nil {
+		log.Errorf(m.Context, "failed marshal src: %#v error:%s ", src, err.Error())
+		return err
+	}
+	json.Unmarshal(bytes, dest)
+	return nil
+}
 
 //Save save model
 func (m *Model) Save(parent *datastore.Key, i interface{}) (*datastore.Key, error) {

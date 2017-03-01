@@ -85,14 +85,15 @@ func (aes *AppEngineServer) RegisterHandler(path string, f func(ctx context.Cont
 //GetContext returns new context based on host
 func (aes *AppEngineServer) GetContext(r *http.Request) (context.Context, error) {
 	ctx := appengine.NewContext(r)
-	aes.SetNamespace(ctx, r)
+
+	aes.SetNamespaceHeader(ctx, r)
 	aes.SetEnvironmentOnNamespace(ctx, r)
 
 	return appengine.Namespace(ctx, r.Header.Get("X-Namespace"))
 }
 
-//SetNamespace sets environment to be used
-func (aes *AppEngineServer) SetNamespace(ctx context.Context, r *http.Request) {
+//SetNamespaceHeader sets X-Namespace header of request if it doesn't exist to be used
+func (aes *AppEngineServer) SetNamespaceHeader(ctx context.Context, r *http.Request) {
 	if r.Header.Get("X-Namespace") == "" {
 		if r.Header.Get("Host") != "" {
 			log.Debugf(ctx, "using Host as namespace:%s", r.Header.Get("Host"))
@@ -101,18 +102,29 @@ func (aes *AppEngineServer) SetNamespace(ctx context.Context, r *http.Request) {
 			log.Debugf(ctx, "using URL Host as namespace:%s", r.URL.Host)
 			r.Header.Set("X-Namespace", r.URL.Host)
 		}
+	} else {
+		log.Debugf(ctx, "skipping setting namespace, namespace already set to:%s", r.Header.Get("X-Namespace"))
 	}
 }
 
 //SetEnvironmentOnNamespace sets sets namespace environmnet e.g. dev.namespace.xyz
 func (aes *AppEngineServer) SetEnvironmentOnNamespace(ctx context.Context, r *http.Request) {
 	environment := r.URL.Query().Get("env")
-	if environment != "" {
-		log.Debugf(ctx, "setting environment on environment:%s", environment)
-		r.Header.Set("X-Environment", environment)
-		r.Header.Set("X-Namespace", strings.Join([]string{r.Header.Get("X-Environment"), r.Header.Get("X-Namespace")}, "."))
-		log.Debugf(ctx, "environment namespace:%s", r.Header.Get("X-Namespace"))
+	log.Debugf(ctx, "environmentizing namespace:%s", r.Header.Get("X-Namespace"))
+	//does it seems as if this namespace already has an environment set
+	if strings.HasPrefix(r.Header.Get("X-Namespace"), environment) == false {
+
+		if environment != "" {
+			log.Debugf(ctx, "setting environment on namespace:%s environment:%s", r.Header.Get("X-Namespace"), environment)
+			r.Header.Set("X-Environment", environment)
+			r.Header.Set("X-Namespace", strings.Join([]string{r.Header.Get("X-Environment"), r.Header.Get("X-Namespace")}, "."))
+			log.Debugf(ctx, "environment namespace:%s", r.Header.Get("X-Namespace"))
+		} else {
+			log.Debugf(ctx, "no environment specified for request, use http://example.com?env=dev to set environment to dev")
+		}
+
 	} else {
-		log.Debugf(ctx, "no environment specified for request, use http://example.com?env=dev to set environment to dev")
+		log.Debugf(ctx, "skipped setting environment namespace, namespace prefixed with:%s namespace:%s", environment, r.Header.Get("X-Namespace"))
+		r.Header.Set("X-Environment", environment)
 	}
 }
