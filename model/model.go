@@ -89,3 +89,12 @@ func (m *Model) GetClient() (*datastore.Client, error) {
 	}
 	return client, nil
 }
+
+//AttachedIdentification attachs model identifications key and id, need on retrival of information
+func (m *Model) AttachedIdentification(key *datastore.Key) {
+	m.ID = key.ID
+
+	if m.Key == nil {
+		m.Key = key
+	}
+}
