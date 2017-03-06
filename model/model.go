@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"time"
 
@@ -20,6 +21,16 @@ type Model struct {
 	Namespace    string          `json:"-" datastore:"-"`
 	Kind         string          `json:"-" datastore:"-"`
 	Context      context.Context `json:"-" datastore:"-"`
+
+	client *datastore.Client
+}
+
+//Init initializes the model with necessary logic
+func (m *Model) Init(context context.Context, kind string, namespace string) {
+	m.Context = context
+	m.Kind = kind
+	m.Namespace = namespace
+	m.SetClient()
 }
 
 //GetKey generates new key
@@ -27,11 +38,6 @@ func (m *Model) GetKey(parent *datastore.Key) *datastore.Key {
 	key := datastore.IDKey(m.Kind, 0, parent)
 	key.Namespace = m.Namespace
 	return key
-}
-
-//GetKind returns entity kind
-func (m *Model) GetKind() string {
-	return m.Kind
 }
 
 //Hydrate hydrates model
@@ -60,18 +66,8 @@ func (m *Model) UnMarshal(src interface{}, dest interface{}) error {
 
 //Save save model
 func (m *Model) Save(parent *datastore.Key, i interface{}) (*datastore.Key, error) {
-	client, clientErr := m.GetClient()
-	if clientErr != nil {
-		log.Errorf(m.Context, "failed to create client, %s", clientErr.Error())
-		return nil, clientErr
-	}
-
-	//fixme:make this part of model code somehow
-	// i.GetModel().CreatedDate = time.Now()
-	// i.GetModel().ModifiedDate = time.Now()
-
 	log.Debugf(m.Context, "%#v", i)
-	key, putErr := client.Put(m.Context, m.GetKey(parent), i)
+	key, putErr := m.client.Put(m.Context, m.GetKey(parent), i)
 	if putErr != nil {
 		log.Errorf(m.Context, "failed to store model, %s", putErr.Error())
 		return nil, putErr
@@ -80,21 +76,45 @@ func (m *Model) Save(parent *datastore.Key, i interface{}) (*datastore.Key, erro
 	return key, nil
 }
 
-//GetClient returns client which cna be used to communicate with datastore
-func (m *Model) GetClient() (*datastore.Client, error) {
+//SetClient instantiates and sets up client on datastore
+func (m *Model) SetClient() {
 	client, clientErr := datastore.NewClient(m.Context, appengine.AppID(m.Context))
 	if clientErr != nil {
 		log.Errorf(m.Context, "failed to create client, %s", clientErr.Error())
-		return client, clientErr
+		panic(fmt.Errorf("failed to create client, %s", clientErr.Error()))
 	}
-	return client, nil
+	m.client = client
 }
 
-//AttachedIdentification attachs model identifications key and id, need on retrival of information
-func (m *Model) AttachedIdentification(key *datastore.Key) {
-	m.ID = key.ID
+//Run runs passwd query and returns results
+func (m *Model) Run(query *datastore.Query) *datastore.Iterator {
+	return m.client.Run(m.Context, query)
+}
 
+//FindByID finds model my id
+func (m *Model) FindByID(id int64, parent *datastore.Key, destination interface{}) error {
+	m.Identify(datastore.IDKey(m.Kind, id, parent))
+	return m.client.Get(m.Context, m.Key, destination)
+}
+
+//Identify attachs model identifications key and id, need on retrival of information
+func (m *Model) Identify(key *datastore.Key) {
+	m.ID = key.ID
 	if m.Key == nil {
 		m.Key = key
+		m.Key.Namespace = m.Namespace
 	}
+}
+
+//Timestamp timestamps model
+func (m *Model) Timestamp() {
+	if m.CreatedDate.IsZero() {
+		m.CreatedDate = time.Now()
+	}
+	m.ModifiedDate = time.Now()
+}
+
+//IsNil checks to see if this model is empty, since model can't be compared to nil
+func (m *Model) IsNil() bool {
+	return m.CreatedDate.IsZero() == true && m.ModifiedDate.IsZero() == true && m.Key == nil
 }
