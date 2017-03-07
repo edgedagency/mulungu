@@ -33,6 +33,11 @@ func (m *Model) Init(context context.Context, kind string, namespace string) {
 	m.SetClient()
 }
 
+//Client returns instentiated client
+func (m *Model) Client() *datastore.Client {
+	return m.client
+}
+
 //GetKey generates new key
 func (m *Model) GetKey(parent *datastore.Key) *datastore.Key {
 	key := datastore.IDKey(m.Kind, 0, parent)
