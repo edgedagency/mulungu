@@ -100,6 +100,13 @@ func (m *Model) Run(query *datastore.Query) *datastore.Iterator {
 func (m *Model) FindByID(id int64, parent *datastore.Key, destination interface{}) error {
 	m.Identify(datastore.IDKey(m.Kind, id, parent))
 	return m.client.Get(m.Context, m.Key, destination)
+
+}
+
+//DeleteByID deletes user by id
+func (m *Model) DeleteByID(id int64, parent *datastore.Key) error {
+	m.Identify(datastore.IDKey(m.Kind, id, parent))
+	return m.client.Delete(m.Context, m.Key)
 }
 
 //Identify attachs model identifications key and id, need on retrival of information
