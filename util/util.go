@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"reflect"
 
@@ -148,4 +149,17 @@ func InterfaceToStringSlice(i interface{}) []string {
 		stringSlice[index] = InterfaceToString(value)
 	}
 	return stringSlice
+}
+
+//GenerateRandomCode generates random codes based on provided characters of internal character set
+func GenerateRandomCode(length int, characters string) string {
+	if characters == "" {
+		characters = "ohruix3yetu5dei7oqu4gothah4Esei6xudez9saejueshuThaj4ooPh1Shi8engahGhiesaeng9meib8iPhaeNg7eikohSh8ae9"
+	}
+
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = characters[rand.Int63()%int64(len(characters))]
+	}
+	return string(b)
 }
