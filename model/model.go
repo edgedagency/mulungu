@@ -93,6 +93,7 @@ func (m *Model) SetClient() {
 
 //Run runs passwd query and returns results
 func (m *Model) Run(query *datastore.Query) *datastore.Iterator {
+	log.Debugf(m.Context, "running query, %#v", query)
 	return m.client.Run(m.Context, query)
 }
 
