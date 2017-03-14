@@ -69,15 +69,6 @@ func (aes *AppEngineServer) RegisterHandler(path string, f func(ctx context.Cont
 			log.Debugf(ctx, "Zoo Part %s", partValue)
 		}
 
-		// w.Header().Set("Access-Control-Allow-Origin", "*")
-		// w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		//
-		// if r.Method == http.MethodOptions {
-		// 	w.Header().Set("Access-Control-Allow-Origin", "*")
-		// 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		// 	return
-		// }
-
 		f(ctx, w, r)
 	})
 }

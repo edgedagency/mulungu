@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"reflect"
@@ -44,9 +45,15 @@ func JSONDecodeHTTPResponse(r *http.Response) (map[string]interface{}, error) {
 	defer r.Body.Close()
 	results := make(map[string]interface{})
 	err := json.NewDecoder(r.Body).Decode(&results)
+
 	if err != nil {
-		return nil, fmt.Errorf("Failed to decode http response, error %s", err.Error())
+		bs, readAllErr := ioutil.ReadAll(r.Body)
+		if readAllErr != nil {
+			return nil, fmt.Errorf("Failed to decode http response, reading body failed error %s", readAllErr.Error())
+		}
+		return nil, fmt.Errorf("Failed to decode http response, error %s response: %#v bytes: %v value: %s", err.Error(), r.Body, bs, string(bs))
 	}
+
 	return results, nil
 }
 
