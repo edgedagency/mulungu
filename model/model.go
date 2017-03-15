@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/datastore"
+	valid "github.com/asaskevich/govalidator"
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
@@ -23,6 +24,15 @@ type Model struct {
 	Context      context.Context `json:"-" datastore:"-"`
 
 	client *datastore.Client
+}
+
+//Validate determins if model is valid based on validation tags using https://github.com/asaskevich/govalidator
+func (m *Model) Validate(i interface{}) (bool, map[string]string) {
+	_, err := valid.ValidateStruct(i)
+	if err != nil {
+		return false, valid.ErrorsByField(err)
+	}
+	return true, nil
 }
 
 //Init initializes the model with necessary logic
