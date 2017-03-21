@@ -10,5 +10,5 @@ import (
 //Server server interface
 type Server interface {
 	Start()
-	RegisterHandler(path string, f func(context.Context, http.ResponseWriter, *http.Request)) *mux.Route
+	Handler(path string, f func(context.Context, http.ResponseWriter, *http.Request)) *mux.Route
 }

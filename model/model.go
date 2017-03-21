@@ -8,6 +8,7 @@ import (
 
 	"cloud.google.com/go/datastore"
 	valid "github.com/asaskevich/govalidator"
+	"github.com/edgedagency/mulungu/util"
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
@@ -63,6 +64,25 @@ func (m *Model) Hydrate(readCloser io.ReadCloser, i interface{}) error {
 	if err != nil {
 		log.Errorf(m.Context, "failed to decode model, %s", err.Error())
 		return err
+	}
+	return nil
+}
+
+//HydrateWithMap hydrates model
+func (m *Model) HydrateWithMap(data map[string]interface{}, i interface{}) error {
+	log.Debugf(m.Context, "hydrating %#v with %#v", i, data)
+
+	b, byteConversationErr := util.InterfaceToByte(data)
+	if byteConversationErr != nil {
+		log.Errorf(m.Context, "failed to decode model, %s", byteConversationErr.Error())
+		return byteConversationErr
+	}
+
+	unmarshallErr := json.Unmarshal(b, i)
+
+	if unmarshallErr != nil {
+		log.Errorf(m.Context, "failed to decode model, %s", unmarshallErr.Error())
+		return unmarshallErr
 	}
 	return nil
 }

@@ -71,7 +71,7 @@ func (httpRequest *HTTPRequest) SendJSON(httpMethod, requestPath string, request
 	httpRequest.setHeaders(request)
 	httpRequest.setAuthentication(request)
 
-	log.Debugf(httpRequest.context, "sending request to service")
+	log.Debugf(httpRequest.context, "sending request %#v to service", request)
 
 	httpClientResponse, httpClientResponseErr := httpRequest.httpClient.Do(request)
 	log.Debugf(httpRequest.context, "processing response from service call")

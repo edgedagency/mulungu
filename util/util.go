@@ -14,6 +14,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+//InterfaceToByte converts abitary interface to byte
+func InterfaceToByte(v interface{}) ([]byte, error) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
 // JSONDecode converts bytes to map[string]interface{} specified
 func JSONDecode(b []byte) (map[string]interface{}, error) {
 	results := make(map[string]interface{})

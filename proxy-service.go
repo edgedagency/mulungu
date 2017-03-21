@@ -3,10 +3,10 @@ package mulungu
 import (
 	"net/http"
 
+	"github.com/edgedagency/mulungu/logger"
 	"github.com/edgedagency/mulungu/util"
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
-	log "google.golang.org/appengine/log"
 )
 
 //ProxyService object used to make proxy services
@@ -18,18 +18,17 @@ type ProxyService struct {
 }
 
 //NewProxyService returns proxy service handler
-func NewProxyService() *ProxyService {
-	proxyService := &ProxyService{}
+func NewProxyService(ctx context.Context, schema, service, path string) *ProxyService {
+	proxyService := &ProxyService{Context: ctx, Schema: schema, Service: service, Path: path}
 	return proxyService
 }
 
 //SendHost sends request to provided host
 func (ps *ProxyService) SendHost(host string, method string, data map[string]interface{}, username, password string, secured bool, headers map[string]string) (*HTTPResponse, error) {
-	serviceHost := GenerateGoogleServiceHost(host, ps.Service)
-	httpResponse := NewHTTPRequest(ps.Context, ps.Schema, serviceHost, username, password, secured, headers).SendJSON(method, ps.Path, data)
+	httpResponse := NewHTTPRequest(ps.Context, ps.Schema, GenerateGoogleServiceHost(host, ps.Service), username, password, secured, headers).SendJSON(method, ps.Path, data)
 
 	if httpResponse.HasErrors() {
-		log.Errorf(ps.Context, "failed to processes/proxy request, error: %s", httpResponse.Error.Error())
+		logger.Errorf(ps.Context, "proxy service", "failed to processes/proxy request, error: %s", httpResponse.Error.Error())
 		return httpResponse, httpResponse.Error
 	}
 
@@ -42,7 +41,7 @@ func (ps *ProxyService) Send(method string, data map[string]interface{}, usernam
 	httpResponse := NewHTTPRequest(ps.Context, ps.Schema, serviceHost, username, password, secured, headers).SendJSON(method, ps.Path, data)
 
 	if httpResponse.HasErrors() {
-		log.Errorf(ps.Context, "failed to processes/proxy request, error: %s", httpResponse.Error.Error())
+		logger.Errorf(ps.Context, "proxy service", "failed to processes/proxy request, error: %s", httpResponse.Error.Error())
 		return httpResponse, httpResponse.Error
 	}
 
@@ -53,9 +52,9 @@ func (ps *ProxyService) Send(method string, data map[string]interface{}, usernam
 func (ps *ProxyService) ProxyHost(host string, w http.ResponseWriter, r *http.Request) (*HTTPResponse, error) {
 	data, dataErr := util.JSONDecodeHTTPRequest(r)
 	if dataErr != nil {
-		log.Errorf(ps.Context, "failed to decode body, error : %s", dataErr.Error())
+		logger.Errorf(ps.Context, "proxy service", "failed to decode body, error : %s", dataErr.Error())
 	}
-	log.Debugf(ps.Context, "firing off request, data:%v service:%s path:%s", data, ps.Service, ps.Path)
+	logger.Errorf(ps.Context, "proxy service", "firing off request, data:%v service:%s path:%s", data, ps.Service, ps.Path)
 	return ps.SendHost(host, r.Method, data, "", "", false, map[string]string{"Content-Type": "application/json; charset=utf-8", "X-Namespace": r.Header.Get("Host")})
 }
 
@@ -63,13 +62,8 @@ func (ps *ProxyService) ProxyHost(host string, w http.ResponseWriter, r *http.Re
 func (ps *ProxyService) Proxy(w http.ResponseWriter, r *http.Request) (*HTTPResponse, error) {
 	data, dataErr := util.JSONDecodeHTTPRequest(r)
 	if dataErr != nil {
-		log.Errorf(ps.Context, "failed to decode body, error : %s", dataErr.Error())
+		logger.Errorf(ps.Context, "proxy service", "failed to decode body, error : %s", dataErr.Error())
 	}
-	log.Debugf(ps.Context, "firing off request, data:%v service:%s path:%s", data, ps.Service, ps.Path)
+	logger.Debugf(ps.Context, "proxy service", "firing off request, data:%v service:%s path:%s", data, ps.Service, ps.Path)
 	return ps.Send(r.Method, data, "", "", false, map[string]string{"Content-Type": "application/json; charset=utf-8", "X-Namespace": r.Header.Get("Host")})
-}
-
-//SetUsername sets username to use for this proxy service
-func (ps *ProxyService) SetUsername(username string) {
-
 }

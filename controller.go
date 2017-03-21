@@ -13,8 +13,19 @@ import (
 
 //Controller provides basic controller functionionlity
 type Controller struct {
-	Server
 	Config *configuration.Config
+}
+
+//Data returns request body as map[string]interface{}
+func (c *Controller) Data(ctx context.Context, w http.ResponseWriter, r *http.Request) map[string]interface{} {
+	data, err := util.JSONDecodeHTTPRequest(r)
+	if err != nil {
+		log.Errorf(ctx, "failed to decode request, error %s", err.Error())
+		c.JSONResponse(w, NewResponse(map[string]interface{}{"message": "unable to decode request", "error": err.Error()},
+			"failed to process request", true), http.StatusBadRequest)
+		return nil
+	}
+	return data
 }
 
 //HydrateModel hydrates model from request body
