@@ -1,4 +1,4 @@
-package model
+package constant
 
 //Status represents a status
 type Status int
