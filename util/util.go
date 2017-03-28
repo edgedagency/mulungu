@@ -52,6 +52,7 @@ func JSONDecodeHTTPRequest(r *http.Request) (map[string]interface{}, error) {
 // JSONDecodeHTTPResponse Unmarshal http.Request.Body to interface
 func JSONDecodeHTTPResponse(r *http.Response) (map[string]interface{}, error) {
 	defer r.Body.Close()
+
 	results := make(map[string]interface{})
 	err := json.NewDecoder(r.Body).Decode(&results)
 

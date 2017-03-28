@@ -8,6 +8,7 @@ import (
 
 	"cloud.google.com/go/datastore"
 	valid "github.com/asaskevich/govalidator"
+	"github.com/edgedagency/mulungu/logger"
 	"github.com/edgedagency/mulungu/util"
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
@@ -62,7 +63,7 @@ func (m *Model) Hydrate(readCloser io.ReadCloser, i interface{}) error {
 
 	err := json.NewDecoder(readCloser).Decode(i)
 	if err != nil {
-		log.Errorf(m.Context, "failed to decode model, %s", err.Error())
+		logger.Errorf(m.Context, "model", "failed to decode model, %s", err.Error())
 		return err
 	}
 	return nil
@@ -74,14 +75,14 @@ func (m *Model) HydrateWithMap(data map[string]interface{}, i interface{}) error
 
 	b, byteConversationErr := util.InterfaceToByte(data)
 	if byteConversationErr != nil {
-		log.Errorf(m.Context, "failed to decode model, %s", byteConversationErr.Error())
+		logger.Errorf(m.Context, "model", "failed to decode model, %s", byteConversationErr.Error())
 		return byteConversationErr
 	}
 
 	unmarshallErr := json.Unmarshal(b, i)
 
 	if unmarshallErr != nil {
-		log.Errorf(m.Context, "failed to decode model, %s", unmarshallErr.Error())
+		logger.Errorf(m.Context, "model", "failed to decode model, %s", unmarshallErr.Error())
 		return unmarshallErr
 	}
 	return nil
@@ -89,10 +90,10 @@ func (m *Model) HydrateWithMap(data map[string]interface{}, i interface{}) error
 
 //UnMarshal uses one interface to populate another
 func (m *Model) UnMarshal(src interface{}, dest interface{}) error {
-	log.Debugf(m.Context, "UnMarshalling src%#v, dest:%#v", src, dest)
+	logger.Debugf(m.Context, "model", "UnMarshalling src%#v, dest:%#v", src, dest)
 	bytes, err := json.Marshal(src)
 	if err != nil {
-		log.Errorf(m.Context, "failed marshal src: %#v error:%s ", src, err.Error())
+		logger.Errorf(m.Context, "model", "failed marshal src: %#v error:%s ", src, err.Error())
 		return err
 	}
 	json.Unmarshal(bytes, dest)
@@ -101,12 +102,14 @@ func (m *Model) UnMarshal(src interface{}, dest interface{}) error {
 
 //Save save model
 func (m *Model) Save(parent *datastore.Key, i interface{}) (*datastore.Key, error) {
-	log.Debugf(m.Context, "%#v", i)
+	logger.Debugf(m.Context, "model", "saving %#v", i)
 	key, putErr := m.client.Put(m.Context, m.GetKey(parent), i)
 	if putErr != nil {
-		log.Errorf(m.Context, "failed to store model, %s", putErr.Error())
+		logger.Errorf(m.Context, "model", "failed to store model, %s", putErr.Error())
 		return nil, putErr
 	}
+
+	logger.Debugf(m.Context, "model", "saved %#v with key %#v", i, key)
 
 	return key, nil
 }
@@ -115,7 +118,7 @@ func (m *Model) Save(parent *datastore.Key, i interface{}) (*datastore.Key, erro
 func (m *Model) SetClient() {
 	client, clientErr := datastore.NewClient(m.Context, appengine.AppID(m.Context))
 	if clientErr != nil {
-		log.Errorf(m.Context, "failed to create client, %s", clientErr.Error())
+		logger.Errorf(m.Context, "model", "failed to create client, %s", clientErr.Error())
 		panic(fmt.Errorf("failed to create client, %s", clientErr.Error()))
 	}
 	m.client = client
