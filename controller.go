@@ -7,6 +7,7 @@ import (
 
 	"github.com/edgedagency/mulungu/configuration"
 	"github.com/edgedagency/mulungu/util"
+	"github.com/gorilla/mux"
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/log"
 )
@@ -26,6 +27,15 @@ func (c *Controller) Data(ctx context.Context, w http.ResponseWriter, r *http.Re
 		return nil
 	}
 	return data
+}
+
+//PathValue obtians value from path variable configurations
+func (c *Controller) PathValue(r *http.Request, key, defaultValue string) string {
+	pathValues := mux.Vars(r)
+	if value, ok := pathValues[key]; ok {
+		return value
+	}
+	return defaultValue
 }
 
 //HydrateModel hydrates model from request body
