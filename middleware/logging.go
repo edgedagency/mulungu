@@ -21,7 +21,7 @@ func Logging(next http.Handler) http.Handler {
 		}
 
 		logger.Debugf(ctx, "middleware logging", "request")
-		logger.Debugf(ctx, "middleware logging", "BEFORE: URI:%s DefaultHostName:%s Host:%s Path:%s Referer:%s IP:%s Scheme:%s Method:%s X-Namespace:%s appId:%s datacenter:%s environment:%s proxy-host:%s",
+		logger.Debugf(ctx, "middleware logging", "BEFORE: URI:%s DefaultHostName:%s Host:%s Path:%s Referer:%s IP:%s Scheme:%s Method:%s X-Namespace:%s appId:%s datacenter:%s environment:%s proxy-host:%s authorised:%s roles:%s",
 			r.URL.RequestURI(),
 			appengine.DefaultVersionHostname(ctx),
 			r.URL.Host,
@@ -34,11 +34,13 @@ func Logging(next http.Handler) http.Handler {
 			appengine.AppID(ctx),
 			appengine.Datacenter(ctx),
 			r.Header.Get("X-Environment"),
-			r.Header.Get("X-PROXY-HOST"))
+			r.Header.Get("X-PROXY-HOST"),
+			r.Header.Get("X-AUTHORISED"),
+			r.Header.Get("X-AUTHORISED-ROLES"))
 
 		next.ServeHTTP(w, r)
 
-		logger.Debugf(ctx, "middleware logging", "AFTER: URI:%s DefaultHostName:%s Host:%s Path:%s Referer:%s IP:%s Scheme:%s Method:%s X-Namespace:%s appId:%s datacenter:%s environment:%s proxy-host:%s",
+		logger.Debugf(ctx, "middleware logging", "AFTER: URI:%s DefaultHostName:%s Host:%s Path:%s Referer:%s IP:%s Scheme:%s Method:%s X-Namespace:%s appId:%s datacenter:%s environment:%s proxy-host:%s authorised:%s roles:%s",
 			r.URL.RequestURI(),
 			appengine.DefaultVersionHostname(ctx),
 			r.URL.Host,
@@ -51,6 +53,8 @@ func Logging(next http.Handler) http.Handler {
 			appengine.AppID(ctx),
 			appengine.Datacenter(ctx),
 			r.Header.Get("X-Environment"),
-			r.Header.Get("X-PROXY-HOST"))
+			r.Header.Get("X-PROXY-HOST"),
+			r.Header.Get("X-AUTHORISED"),
+			r.Header.Get("X-AUTHORISED-ROLES"))
 	})
 }

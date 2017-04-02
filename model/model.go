@@ -17,13 +17,15 @@ import (
 
 //Model element used to interact with datastore
 type Model struct {
-	Key          *datastore.Key  `json:"key,omitempty" datastore:"__key__,omitempty"`
-	ID           int64           `json:"id,omitempty" datastore:"-"`
-	CreatedDate  time.Time       `json:"createdDate" datastore:"createdDate,omitempty"`
-	ModifiedDate time.Time       `json:"modifiedDate" datastore:"modifiedDate,omitempty"`
-	Namespace    string          `json:"-" datastore:"-"`
-	Kind         string          `json:"-" datastore:"-"`
-	Context      context.Context `json:"-" datastore:"-"`
+	Key          *datastore.Key `json:"key,omitempty" datastore:"__key__,omitempty"`
+	ID           int64          `json:"id,omitempty" datastore:"-"`
+	TenantID     int64          `json:"tenantID,omitempty" datastore:"tenantID,omitempty"`
+	CreatedDate  time.Time      `json:"createdDate,omitempty" datastore:"createdDate,omitempty"`
+	ModifiedDate time.Time      `json:"modifiedDate,omitempty" datastore:"modifiedDate,omitempty"`
+
+	Namespace string          `json:"-" datastore:"-"`
+	Kind      string          `json:"-" datastore:"-"`
+	Context   context.Context `json:"-" datastore:"-"`
 
 	client *datastore.Client
 }
