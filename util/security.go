@@ -4,13 +4,14 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/edgedagency/mulungu/constant"
 	"github.com/edgedagency/mulungu/logger"
 	"golang.org/x/net/context"
 )
 
 //IsAuthorised checks if Request is authorised
 func IsAuthorised(ctx context.Context, r *http.Request) bool {
-	requestAuthorised := r.Header.Get("X-AUTHORISED")
+	requestAuthorised := r.Header.Get(constant.HeaderAuthorised)
 	logger.Debugf(ctx, "security util", "checking if request has been authorised, authorised %s", requestAuthorised)
 
 	if requestAuthorised != "" && requestAuthorised == "true" {
@@ -22,7 +23,7 @@ func IsAuthorised(ctx context.Context, r *http.Request) bool {
 
 //HasAnyRole checks if this request has any of the roles specified in roles
 func HasAnyRole(ctx context.Context, roles []string, r *http.Request) bool {
-	requestRoles := strings.Split(r.Header.Get("X-AUTHORISED-ROLES"), ",")
+	requestRoles := strings.Split(r.Header.Get(constant.HeaderAuthorisedRole), ",")
 	logger.Debugf(ctx, "security util", "request roles %#v ", requestRoles)
 
 	if len(requestRoles) > 0 {

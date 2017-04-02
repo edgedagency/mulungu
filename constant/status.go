@@ -5,7 +5,7 @@ type Status int
 
 // status options
 const (
-	Active = iota + 1
+	Active Status = iota + 1
 	InActive
 	Pending
 	Deleted
