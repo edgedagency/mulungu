@@ -59,9 +59,42 @@ func (m *Model) GetKey(parent *datastore.Key) *datastore.Key {
 	return key
 }
 
+//Save save model
+func (m *Model) Save(parent *datastore.Key, i interface{}) (*datastore.Key, error) {
+	logger.Debugf(m.Context, "model", "saving %#v", i)
+	key, putErr := m.client.Put(m.Context, m.GetKey(parent), i)
+	if putErr != nil {
+		logger.Errorf(m.Context, "model", "failed to store record, %s", putErr.Error())
+		return nil, putErr
+	}
+
+	logger.Debugf(m.Context, "model", "saved %#v with key %#v", i, key)
+
+	return key, nil
+}
+
+//DeleteByID deletes user by id
+func (m *Model) DeleteByID(id int64, parent *datastore.Key) error {
+	m.Identify(datastore.IDKey(m.Kind, id, parent))
+	return m.client.Delete(m.Context, m.Key)
+}
+
+//Run runs passwd query and returns results
+func (m *Model) Run(query *datastore.Query) *datastore.Iterator {
+	log.Debugf(m.Context, "running query, %#v", query)
+	return m.client.Run(m.Context, query)
+}
+
+//FindByID finds model my id
+func (m *Model) FindByID(id int64, parent *datastore.Key, destination interface{}) error {
+	m.Identify(datastore.IDKey(m.Kind, id, parent))
+	return m.client.Get(m.Context, m.Key, destination)
+
+}
+
 //Hydrate hydrates model
 func (m *Model) Hydrate(readCloser io.ReadCloser, i interface{}) error {
-	log.Debugf(m.Context, "hydrating %#v", i)
+	logger.Debugf(m.Context, "model", "hydrating %#v", i)
 
 	err := json.NewDecoder(readCloser).Decode(i)
 	if err != nil {
@@ -73,7 +106,7 @@ func (m *Model) Hydrate(readCloser io.ReadCloser, i interface{}) error {
 
 //HydrateWithMap hydrates model
 func (m *Model) HydrateWithMap(data map[string]interface{}, i interface{}) error {
-	log.Debugf(m.Context, "hydrating %#v with %#v", i, data)
+	logger.Debugf(m.Context, "model", "hydrating %#v with %#v", i, data)
 
 	b, byteConversationErr := util.InterfaceToByte(data)
 	if byteConversationErr != nil {
@@ -102,20 +135,6 @@ func (m *Model) UnMarshal(src interface{}, dest interface{}) error {
 	return nil
 }
 
-//Save save model
-func (m *Model) Save(parent *datastore.Key, i interface{}) (*datastore.Key, error) {
-	logger.Debugf(m.Context, "model", "saving %#v", i)
-	key, putErr := m.client.Put(m.Context, m.GetKey(parent), i)
-	if putErr != nil {
-		logger.Errorf(m.Context, "model", "failed to store model, %s", putErr.Error())
-		return nil, putErr
-	}
-
-	logger.Debugf(m.Context, "model", "saved %#v with key %#v", i, key)
-
-	return key, nil
-}
-
 //SetClient instantiates and sets up client on datastore
 func (m *Model) SetClient() {
 	client, clientErr := datastore.NewClient(m.Context, appengine.AppID(m.Context))
@@ -124,25 +143,6 @@ func (m *Model) SetClient() {
 		panic(fmt.Errorf("failed to create client, %s", clientErr.Error()))
 	}
 	m.client = client
-}
-
-//Run runs passwd query and returns results
-func (m *Model) Run(query *datastore.Query) *datastore.Iterator {
-	log.Debugf(m.Context, "running query, %#v", query)
-	return m.client.Run(m.Context, query)
-}
-
-//FindByID finds model my id
-func (m *Model) FindByID(id int64, parent *datastore.Key, destination interface{}) error {
-	m.Identify(datastore.IDKey(m.Kind, id, parent))
-	return m.client.Get(m.Context, m.Key, destination)
-
-}
-
-//DeleteByID deletes user by id
-func (m *Model) DeleteByID(id int64, parent *datastore.Key) error {
-	m.Identify(datastore.IDKey(m.Kind, id, parent))
-	return m.client.Delete(m.Context, m.Key)
 }
 
 //Identify attachs model identifications key and id, need on retrival of information
