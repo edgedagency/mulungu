@@ -38,6 +38,15 @@ func (c *Controller) PathValue(r *http.Request, key, defaultValue string) string
 	return defaultValue
 }
 
+//ParamValue obtains param value from url ?env=dev&expire-date=1896
+func (c *Controller) ParamValue(r *http.Request, key, defaultValue string) string {
+	paramValue := r.FormValue(key)
+	if len(paramValue) > 0 {
+		return paramValue
+	}
+	return defaultValue
+}
+
 //HydrateModel hydrates model from request body
 func (c *Controller) HydrateModel(ctx context.Context, readCloser io.ReadCloser, dest interface{}) error {
 	err := json.NewDecoder(readCloser).Decode(dest)
