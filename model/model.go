@@ -53,8 +53,8 @@ func (m *Model) Client() *datastore.Client {
 }
 
 //GetKey generates new key
-func (m *Model) GetKey(parent *datastore.Key) *datastore.Key {
-	key := datastore.IDKey(m.Kind, 0, parent)
+func (m *Model) GetKey(id int64, parent *datastore.Key) *datastore.Key {
+	key := datastore.IDKey(m.Kind, id, parent)
 	key.Namespace = m.Namespace
 	return key
 }
@@ -62,13 +62,27 @@ func (m *Model) GetKey(parent *datastore.Key) *datastore.Key {
 //Save save model
 func (m *Model) Save(parent *datastore.Key, i interface{}) (*datastore.Key, error) {
 	logger.Debugf(m.Context, "model", "saving %#v", i)
-	key, putErr := m.client.Put(m.Context, m.GetKey(parent), i)
+	key, putErr := m.client.Put(m.Context, m.GetKey(0, parent), i)
 	if putErr != nil {
 		logger.Errorf(m.Context, "model", "failed to store record, %s", putErr.Error())
 		return nil, putErr
 	}
 
-	logger.Debugf(m.Context, "model", "saved %#v with key %#v", i, key)
+	logger.Debugf(m.Context, "model", "saved record %#v with key %#v", i, key)
+
+	return key, nil
+}
+
+//Update save model
+func (m *Model) Update(id int64, parent *datastore.Key, i interface{}) (*datastore.Key, error) {
+	logger.Debugf(m.Context, "model", "saving %#v", i)
+	key, putErr := m.client.Put(m.Context, m.GetKey(id, parent), i)
+	if putErr != nil {
+		logger.Errorf(m.Context, "model", "failed to update record, %s", putErr.Error())
+		return nil, putErr
+	}
+
+	logger.Debugf(m.Context, "model", "updated record %#v with key %#v", i, key)
 
 	return key, nil
 }
