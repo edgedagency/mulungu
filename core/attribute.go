@@ -1,4 +1,4 @@
-package model
+package core
 
 import "github.com/edgedagency/mulungu/constant"
 

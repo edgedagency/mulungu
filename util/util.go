@@ -23,6 +23,25 @@ func InterfaceToByte(v interface{}) ([]byte, error) {
 	return b, nil
 }
 
+//MapToJSONString convert map to string to string
+func MapToJSONString(subject map[string]string) string {
+	bytes, err := json.Marshal(subject)
+	if err != nil {
+		return ""
+	}
+	return string(bytes)
+}
+
+//JSONStringToMap convert string map[string]string
+func JSONStringToMap(subject string) map[string]string {
+	outputMap := make(map[string]string)
+	err := json.Unmarshal([]byte(subject), &outputMap)
+	if err != nil {
+		return nil
+	}
+	return outputMap
+}
+
 // JSONDecode converts bytes to map[string]interface{} specified
 func JSONDecode(b []byte) (map[string]interface{}, error) {
 	results := make(map[string]interface{})
@@ -78,6 +97,14 @@ func MD5Hash(text string) string {
 func ReflectKind(subject interface{}) reflect.Kind {
 	typeKind := reflect.ValueOf(subject).Type().Kind()
 	return typeKind
+}
+
+//IsString returns true if interface passed is an array
+func IsString(subject interface{}) bool {
+	if ReflectKind(subject) == reflect.String {
+		return true
+	}
+	return false
 }
 
 //IsArray returns true if interface passed is an array
@@ -166,6 +193,16 @@ func InterfaceToStringSlice(i interface{}) []string {
 		stringSlice[index] = InterfaceToString(value)
 	}
 	return stringSlice
+}
+
+//InterfaceToMapString converts interface to map[string]string
+func InterfaceToMapString(subject interface{}) map[string]string {
+	switch ReflectKind(subject) {
+	case reflect.String:
+		return JSONStringToMap(subject.(string))
+	}
+
+	return nil
 }
 
 //GenerateRandomCode generates random codes based on provided characters of internal character set

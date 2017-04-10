@@ -1,4 +1,4 @@
-package model
+package core
 
 //Modeler model interface
 type Modeler interface {
