@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/datastore"
@@ -75,7 +76,7 @@ func (m *Model) Save(parent *datastore.Key, i interface{}) (*datastore.Key, erro
 
 //Update save model
 func (m *Model) Update(id int64, parent *datastore.Key, i interface{}) (*datastore.Key, error) {
-	logger.Debugf(m.Context, "model", "saving %#v", i)
+	logger.Debugf(m.Context, "model", "updating record with id %d with %#v", id, i)
 	key, putErr := m.client.Put(m.Context, m.GetKey(id, parent), i)
 	if putErr != nil {
 		logger.Errorf(m.Context, "model", "failed to update record, %s", putErr.Error())
@@ -120,19 +121,16 @@ func (m *Model) Hydrate(readCloser io.ReadCloser, i interface{}) error {
 
 //HydrateWithMap hydrates model
 func (m *Model) HydrateWithMap(data map[string]interface{}, i interface{}) error {
-	logger.Debugf(m.Context, "model", "hydrating %#v with %#v", i, data)
 
-	b, byteConversationErr := util.InterfaceToByte(data)
-	if byteConversationErr != nil {
-		logger.Errorf(m.Context, "model", "failed to decode model, %s", byteConversationErr.Error())
-		return byteConversationErr
-	}
+	dataString := util.MapInterfaceToJSONString(data)
+	logger.Debugf(m.Context, "model", "hydrating: %#v with: %#v data-string: %#v", i, data, dataString)
 
-	unmarshallErr := json.Unmarshal(b, i)
+	d := json.NewDecoder(strings.NewReader(dataString))
+	d.UseNumber()
 
-	if unmarshallErr != nil {
-		logger.Errorf(m.Context, "model", "failed to decode model, %s", unmarshallErr.Error())
-		return unmarshallErr
+	if decoderErr := d.Decode(i); decoderErr != nil {
+		logger.Errorf(m.Context, "model", "failed to decode, %s", decoderErr.Error())
+		return decoderErr
 	}
 	return nil
 }

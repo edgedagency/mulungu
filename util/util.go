@@ -25,6 +25,16 @@ func InterfaceToByte(v interface{}) ([]byte, error) {
 
 //MapToJSONString convert map to string to string
 func MapToJSONString(subject map[string]string) string {
+
+	bytes, err := json.Marshal(subject)
+	if err != nil {
+		return ""
+	}
+	return string(bytes)
+}
+
+//MapInterfaceToJSONString convert map to string to string
+func MapInterfaceToJSONString(subject map[string]interface{}) string {
 	bytes, err := json.Marshal(subject)
 	if err != nil {
 		return ""
@@ -59,8 +69,10 @@ func JSONDecodeHTTPRequest(r *http.Request) (map[string]interface{}, error) {
 	if r.Method != http.MethodGet {
 		defer r.Body.Close()
 		results := make(map[string]interface{})
-		err := json.NewDecoder(r.Body).Decode(&results)
-		if err != nil {
+		decoder := json.NewDecoder(r.Body)
+		decoder.UseNumber()
+
+		if err := decoder.Decode(&results); err != nil {
 			return nil, fmt.Errorf("Failed to decode http request, error %s", err.Error())
 		}
 		return results, nil
@@ -73,9 +85,10 @@ func JSONDecodeHTTPResponse(r *http.Response) (map[string]interface{}, error) {
 	defer r.Body.Close()
 
 	results := make(map[string]interface{})
-	err := json.NewDecoder(r.Body).Decode(&results)
+	decoder := json.NewDecoder(r.Body)
+	decoder.UseNumber()
 
-	if err != nil {
+	if err := decoder.Decode(&results); err != nil {
 		bs, readAllErr := ioutil.ReadAll(r.Body)
 		if readAllErr != nil {
 			return nil, fmt.Errorf("Failed to decode http response, reading body failed error %s", readAllErr.Error())
