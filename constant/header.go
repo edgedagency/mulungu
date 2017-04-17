@@ -9,4 +9,5 @@ const (
 	HeaderContentType               = "Content-Type"
 	HeaderAuthorised                = "X-Authorised"
 	HeaderAuthorisedRole            = "X-Authorised-Role"
+	HeaderTenantID                  = "X-Authorised-Tenant-ID"
 )
