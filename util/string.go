@@ -1,6 +1,7 @@
 package util
 
 import (
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -31,4 +32,19 @@ func StringToInt64(subject string) int64 {
 		return 0
 	}
 	return i
+}
+
+//ToString Converts interface to a string
+func ToString(subject interface{}) string {
+
+	switch ReflectKind(subject) {
+	case reflect.String:
+		return subject.(string)
+	case reflect.Int64:
+		return strconv.FormatInt(subject.(int64), 10)
+	case reflect.Float64:
+		return strconv.FormatFloat(subject.(float64), 'E', -1, 64)
+	}
+
+	return ""
 }
