@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 
+	"github.com/edgedagency/mulungu/constant"
 	"github.com/edgedagency/mulungu/logger"
 
 	"google.golang.org/appengine"
@@ -30,13 +31,13 @@ func Logging(next http.Handler) http.Handler {
 			r.RemoteAddr,
 			r.URL.Scheme,
 			r.Method,
-			r.Header.Get("X-Namespace"),
+			r.Header.Get(constant.HeaderNamespace),
 			appengine.AppID(ctx),
 			appengine.Datacenter(ctx),
-			r.Header.Get("X-Environment"),
-			r.Header.Get("X-PROXY-HOST"),
-			r.Header.Get("X-AUTHORISED"),
-			r.Header.Get("X-AUTHORISED-ROLES"))
+			r.Header.Get(constant.HeaderEnvironment),
+			r.Header.Get(constant.HeaderProxyHost),
+			r.Header.Get(constant.HeaderAuthorised),
+			r.Header.Get(constant.HeaderAuthorisedRole))
 
 		next.ServeHTTP(w, r)
 
@@ -49,12 +50,12 @@ func Logging(next http.Handler) http.Handler {
 			r.RemoteAddr,
 			r.URL.Scheme,
 			r.Method,
-			r.Header.Get("X-Namespace"),
+			r.Header.Get(constant.HeaderNamespace),
 			appengine.AppID(ctx),
 			appengine.Datacenter(ctx),
-			r.Header.Get("X-Environment"),
-			r.Header.Get("X-PROXY-HOST"),
-			r.Header.Get("X-AUTHORISED"),
-			r.Header.Get("X-AUTHORISED-ROLES"))
+			r.Header.Get(constant.HeaderEnvironment),
+			r.Header.Get(constant.HeaderProxyHost),
+			r.Header.Get(constant.HeaderAuthorised),
+			r.Header.Get(constant.HeaderAuthorisedRole))
 	})
 }

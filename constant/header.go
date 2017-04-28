@@ -10,4 +10,5 @@ const (
 	HeaderAuthorised                = "X-Authorised"
 	HeaderAuthorisedRole            = "X-Authorised-Role"
 	HeaderTenantID                  = "X-Authorised-Tenant-ID"
+	HeaderEnvironment               = "X-Environment"
 )
