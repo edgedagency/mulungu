@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/rand"
 	"net/http"
 	"reflect"
@@ -66,36 +66,30 @@ func JSONDecode(b []byte) (map[string]interface{}, error) {
 
 // JSONDecodeHTTPRequest Unmarshal http.Request.Body to interface
 func JSONDecodeHTTPRequest(r *http.Request) (map[string]interface{}, error) {
-	if r.Method != http.MethodGet {
-		defer r.Body.Close()
-		results := make(map[string]interface{})
-		decoder := json.NewDecoder(r.Body)
-		decoder.UseNumber()
-
-		if err := decoder.Decode(&results); err != nil {
-			return nil, fmt.Errorf("Failed to decode http request, error %s", err.Error())
-		}
-		return results, nil
-	}
-	return nil, nil
+	defer r.Body.Close()
+	return ToMapStringInterface(r.Body)
 }
 
 // JSONDecodeHTTPResponse Unmarshal http.Request.Body to interface
 func JSONDecodeHTTPResponse(r *http.Response) (map[string]interface{}, error) {
 	defer r.Body.Close()
+	return ToMapStringInterface(r.Body)
+}
 
+//ToMapStringInterface converts io.Reader to map[string]interface
+func ToMapStringInterface(r io.Reader) (map[string]interface{}, error) {
 	results := make(map[string]interface{})
-	decoder := json.NewDecoder(r.Body)
+	decoder := json.NewDecoder(r)
 	decoder.UseNumber()
+	decodeErr := decoder.Decode(&results)
 
-	if err := decoder.Decode(&results); err != nil {
-		bs, readAllErr := ioutil.ReadAll(r.Body)
-		if readAllErr != nil {
-			return nil, fmt.Errorf("Failed to decode http response, reading body failed error %s", readAllErr.Error())
-		}
-		return nil, fmt.Errorf("Failed to decode http response, error %s response: %#v bytes: %v value: %s", err.Error(), r.Body, bs, string(bs))
+	switch {
+	case decodeErr == io.EOF:
+		fmt.Println("no data to decode")
+		return nil, nil
+	case decodeErr != nil:
+		return nil, fmt.Errorf("Failed to decode reader, error %s", decodeErr.Error())
 	}
-
 	return results, nil
 }
 
