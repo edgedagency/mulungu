@@ -56,7 +56,7 @@ func NewHTTPRequest(ctx context.Context, schema, host, username, password string
 }
 
 // SendJSON construct a json request body for this request and sends to configured http endpoint
-func (httpRequest *HTTPRequest) SendJSON(httpMethod, requestPath string, requestBody map[string]interface{}) *HTTPResponse {
+func (httpRequest *HTTPRequest) SendJSON(httpMethod, requestPath string, requestBody interface{}) *HTTPResponse {
 	marshalledRequestBody, err := json.Marshal(requestBody)
 	requestURL := httpRequest.constructRequestURL(requestPath)
 
@@ -82,6 +82,33 @@ func (httpRequest *HTTPRequest) SendJSON(httpMethod, requestPath string, request
 
 	return &HTTPResponse{context: httpRequest.context, Response: httpClientResponse, Error: httpClientResponseErr}
 }
+
+// // Send sends request as raw as its received
+// func (httpRequest *HTTPRequest) Send(httpMethod, requestPath string, requestBody interface{}) *HTTPResponse {
+// 	requestURL := httpRequest.constructRequestURL(requestPath)
+//
+// 	logger.Debugf(httpRequest.context, "http request", "preparing request details, method %s, requestPath %s, requestURL %s", httpMethod, requestPath, requestURL)
+// 	request, err := http.NewRequest(httpMethod, requestURL, bytes.NewBuffer(requestBody))
+//
+// 	if err != nil {
+// 		logger.Errorf(httpRequest.context, "http request", "failed to create http request %s", err.Error())
+// 		return &HTTPResponse{context: httpRequest.context, Response: nil, Error: err}
+// 	}
+//
+// 	httpRequest.setHeaders(request)
+// 	httpRequest.setAuthentication(request)
+//
+// 	logger.Debugf(httpRequest.context, "http request", "sending request %#v to service", request)
+//
+// 	httpClientResponse, httpClientResponseErr := httpRequest.httpClient.Do(request)
+// 	logger.Debugf(httpRequest.context, "http request", "processing response from service call")
+//
+// 	if httpClientResponseErr != nil {
+// 		logger.Errorf(httpRequest.context, "http request", "request failed, error %s", httpClientResponseErr.Error())
+// 	}
+//
+// 	return &HTTPResponse{context: httpRequest.context, Response: httpClientResponse, Error: httpClientResponseErr}
+// }
 
 func (httpRequest *HTTPRequest) constructRequestURL(requestPath string) string {
 	if strings.HasPrefix(requestPath, "/") == false {
