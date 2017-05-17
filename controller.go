@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/edgedagency/mulungu/configuration"
 	"github.com/edgedagency/mulungu/util"
 	"github.com/gorilla/mux"
 	"golang.org/x/net/context"
@@ -14,7 +13,7 @@ import (
 
 //Controller provides basic controller functionionlity
 type Controller struct {
-	Config *configuration.Config
+	//Config *configuration.Config
 }
 
 //Data returns request body as map[string]interface{}
