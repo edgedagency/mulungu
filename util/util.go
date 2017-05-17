@@ -85,11 +85,12 @@ func ToMapStringInterface(r io.Reader) (map[string]interface{}, error) {
 
 	switch {
 	case decodeErr == io.EOF:
-		fmt.Println("no data to decode")
+		fmt.Println("request has no body, decoding skipped returning nil")
 		return nil, nil
 	case decodeErr != nil:
 		return nil, fmt.Errorf("Failed to decode reader, error %s", decodeErr.Error())
 	}
+
 	return results, nil
 }
 
