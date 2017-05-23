@@ -32,6 +32,7 @@ func (e *Entry) Get(key string) string {
 
 //Set sets or updates a configuration
 func (e *Entry) Set(key string, value string) *Entry {
+
 	//set  configuration entry with key
 	// overrides existing entry, therefore check ig an entry with key exists update if true create new if false
 	return nil
