@@ -9,4 +9,6 @@ const (
 	ErrFailedValidation
 	ErrFailedBusinessRules
 	ErrFailedEncryption
+	ErrDBFailed
+	ErrDBNotfound
 )

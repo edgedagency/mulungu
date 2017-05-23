@@ -18,6 +18,8 @@ func IsAuthorised(ctx context.Context, r *http.Request) bool {
 		logger.Debugf(ctx, "security util", "request contains authorization information, authorised %s", requestAuthorised)
 		return true
 	}
+
+	logger.Debugf(ctx, "security util", "request not authorised")
 	return false
 }
 
