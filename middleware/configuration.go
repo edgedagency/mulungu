@@ -25,7 +25,9 @@ func ConfigurationMiddleware(next http.Handler) http.Handler {
 		// configurations := configurationsModel.findAll()
 		// logger.Debugf(ctx, "middleware configurations", "getting configurations with namespace %#v", configurations)
 
+		// everything above here is called before a request
 		next.ServeHTTP(w, r)
+		// everything below here is called after a request
 
 	})
 }
