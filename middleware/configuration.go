@@ -9,8 +9,8 @@ import (
 	"github.com/edgedagency/mulungu/logger"
 )
 
-//ConfigurationMiddleware create a new Request value from context, and pass it onto the next handler .
-func ConfigurationMiddleware(next http.Handler) http.Handler {
+//Configuration create a new Request value from context, and pass it onto the next handler .
+func Configuration(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := appengine.NewContext(r)
 
