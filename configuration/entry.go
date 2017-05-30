@@ -2,8 +2,11 @@ package configuration
 
 import (
 	"golang.org/x/net/context"
+	"google.golang.org/api/iterator"
 
 	"github.com/edgedagency/mulungu/core"
+	"github.com/edgedagency/mulungu/logger"
+	"github.com/edgedagency/mulungu/query"
 )
 
 //Entry this is a representation of a configuration entry
@@ -28,6 +31,30 @@ func NewConfigurationEntryModel(context context.Context, namespace string) *Entr
 func (e *Entry) Get(key string) string {
 	//get configuration entry by key
 	return ""
+}
+
+//FindAll returns all entries from datastore
+func (e *Entry) FindAll(filter string) ([]*Entry, error) {
+	queryBuilder := query.NewQueryBuilder(e.Context)
+	queryBuilder.Build(e.Kind, filter, "")
+
+	entries := make([]*Entry, 0)
+	results := e.Run(queryBuilder.Query.Namespace(e.Namespace))
+
+	for {
+		resultModel := NewConfigurationEntryModel(e.Context, e.Namespace)
+		key, err := results.Next(resultModel)
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			logger.Errorf(e.Context, "entry model", "failed to obtain results for entry iterator, error %s", err.Error())
+		}
+		logger.Debugf(e.Context, "entry model", "Key=%v\nEntry=#v\n\n", key, resultModel)
+		resultModel.Identify(key)
+		entries = append(entries, resultModel)
+	}
+	return entries, nil
 }
 
 //Set sets or updates a configuration
