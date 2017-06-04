@@ -27,10 +27,24 @@ func NewConfigurationEntryModel(context context.Context, namespace string) *Entr
 	return m
 }
 
+//GetAll retireves all configuration
+func (e *Entry) GetAll(filter string) ([]*Entry, error) {
+	//get configuration entry by key
+	return e.FindAll(filter)
+}
+
 //Get retireves a configuration
 func (e *Entry) Get(key string) string {
 	//get configuration entry by key
 	return ""
+}
+
+//Set sets or updates a configuration
+func (e *Entry) Set(key string, value string) *Entry {
+
+	//set  configuration entry with key
+	// overrides existing entry, therefore check ig an entry with key exists update if true create new if false
+	return nil
 }
 
 //FindAll returns all entries from datastore
@@ -50,17 +64,9 @@ func (e *Entry) FindAll(filter string) ([]*Entry, error) {
 		if err != nil {
 			logger.Errorf(e.Context, "entry model", "failed to obtain results for entry iterator, error %s", err.Error())
 		}
-		logger.Debugf(e.Context, "entry model", "Key=%v\nEntry=#v\n\n", key, resultModel)
+		logger.Debugf(e.Context, "entry model", "Key=%v\nRecord=#v\n", key, resultModel)
 		resultModel.Identify(key)
 		entries = append(entries, resultModel)
 	}
 	return entries, nil
-}
-
-//Set sets or updates a configuration
-func (e *Entry) Set(key string, value string) *Entry {
-
-	//set  configuration entry with key
-	// overrides existing entry, therefore check ig an entry with key exists update if true create new if false
-	return nil
 }
