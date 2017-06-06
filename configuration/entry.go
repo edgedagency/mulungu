@@ -1,6 +1,7 @@
 package configuration
 
 import (
+	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
 
@@ -33,15 +34,32 @@ func (e *Entry) GetAll(filter string) ([]*Entry, error) {
 	return e.FindAll(filter)
 }
 
-//Get retireves a configuration
+//Get retireves a configuration by key
 func (e *Entry) Get(key string) string {
-	//get configuration entry by key
-	return ""
+	configurations := NewConfigurationEntryModel(e.Context, e.Namespace)
+	query := datastore.NewQuery(configurations.Kind).Filter("key=", key).Namespace(e.Namespace).Limit(1)
+
+	logger.Debugf(e.Context, "configuration service", "query = %#v", query)
+	result := e.Client().Run(key.Context, query)
+	for {
+
+		confKey, err := result.Next(configurations)
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			logger.Errorf(e.Context, "configuration service", "failed to retirve record, error %s", err.Error())
+			return nil, err
+		}
+		configurations.Identify(confKey)
+
+		logger.Debugf(e.Context, "user service", "Key=%v\nEntry=%#v\n\n", confKey, configurations)
+	}
+	return configurations, nil
 }
 
 //Set sets or updates a configuration
 func (e *Entry) Set(key string, value string) *Entry {
-
 	//set  configuration entry with key
 	// overrides existing entry, therefore check ig an entry with key exists update if true create new if false
 	return nil
