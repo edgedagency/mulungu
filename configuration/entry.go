@@ -39,8 +39,8 @@ func (e *Entry) Get(key string) string {
 	configurations := NewConfigurationEntryModel(e.Context, e.Namespace)
 	query := datastore.NewQuery(configurations.Kind).Filter("key=", key).Namespace(e.Namespace).Limit(1)
 
-	logger.Debugf(e.Context, "configuration service", "query = %#v", query)
-	result := e.Client().Run(key.Context, query)
+	logger.Debugf(e.Context, "configuration entry model", "query = %#v", query)
+	result := e.Client().Run(e.Context, query)
 	for {
 
 		confKey, err := result.Next(configurations)
@@ -48,14 +48,13 @@ func (e *Entry) Get(key string) string {
 			break
 		}
 		if err != nil {
-			logger.Errorf(e.Context, "configuration service", "failed to retirve record, error %s", err.Error())
-			return nil, err
+			logger.Errorf(e.Context, "configuration entry model", "failed to retirve record, error %s", err.Error())
+			return ""
 		}
 		configurations.Identify(confKey)
-
-		logger.Debugf(e.Context, "user service", "Key=%v\nEntry=%#v\n\n", confKey, configurations)
+		logger.Debugf(e.Context, "configuration entry model", "Key=%v\n Record=%#v\n", confKey, configurations)
 	}
-	return configurations, nil
+	return configurations.Value
 }
 
 //Set sets or updates a configuration
@@ -82,7 +81,7 @@ func (e *Entry) FindAll(filter string) ([]*Entry, error) {
 		if err != nil {
 			logger.Errorf(e.Context, "entry model", "failed to obtain results for entry iterator, error %s", err.Error())
 		}
-		logger.Debugf(e.Context, "entry model", "Key=%v\nRecord=#v\n", key, resultModel)
+		logger.Debugf(e.Context, "entry model", "Key=%v\n Record=#v\n", key, resultModel)
 		resultModel.Identify(key)
 		entries = append(entries, resultModel)
 	}
