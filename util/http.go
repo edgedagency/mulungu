@@ -18,6 +18,18 @@ func WriteJSON(w http.ResponseWriter, responseBody interface{}, statusCode int) 
 	json.NewEncoder(w).Encode(responseBody)
 }
 
+//WriteXML outputs interface to xml
+func WriteXML(w http.ResponseWriter, responseBody interface{}, statusCode int) {
+	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
+	w.WriteHeader(statusCode)
+	// b, err := MapToXML(responseBody.(map[string]interface{}))
+	// if err != nil {
+	// 	w.Write([]byte("<error>failed to process data</error>"))
+	// }
+
+	w.Write([]byte("<error>failed to process data</error>"))
+}
+
 //GeneratePath use this if you would like to generate a path based on request, excluding service. Very specific to applications developed for ibudo
 func GeneratePath(r *http.Request) string {
 	capturedPath := mux.Vars(r)["path"]
@@ -45,4 +57,15 @@ func SetEnvironmentOnNamespace(ctx context.Context, namespace string, r *http.Re
 		log.Debugf(ctx, "skipped setting environment namespace, namespace prefixed with:%s namespace:%s", environment, namespace)
 	}
 	return namespace
+}
+
+//SetNamespace  attaches environment in request to provided spacename
+func SetNamespace(ctx context.Context, r *http.Request) string {
+	namespace := r.URL.Query().Get("ns")
+
+	if namespace != "" {
+		return namespace
+	}
+
+	return ""
 }

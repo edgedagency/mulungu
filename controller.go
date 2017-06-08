@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/edgedagency/mulungu/constant"
 	"github.com/edgedagency/mulungu/util"
 	"github.com/gorilla/mux"
 	"golang.org/x/net/context"
@@ -59,4 +60,14 @@ func (c *Controller) HydrateModel(ctx context.Context, readCloser io.ReadCloser,
 //JSONResponse returns json response and sets right content headers
 func (c *Controller) JSONResponse(w http.ResponseWriter, responseBody interface{}, statusCode int) {
 	util.WriteJSON(w, responseBody, statusCode)
+}
+
+//Response creates a response based on content/accept type
+func (c *Controller) Response(w http.ResponseWriter, r *http.Request, responseBody interface{}, statusCode int) {
+	switch r.Header.Get(constant.HeaderContentType) {
+	case "application/json":
+		util.WriteJSON(w, responseBody, statusCode)
+	case "application/xml":
+		util.WriteXML(w, responseBody, statusCode)
+	}
 }

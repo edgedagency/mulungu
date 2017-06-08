@@ -7,9 +7,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"reflect"
+
+	"github.com/clbanning/mxj"
+	"github.com/edgedagency/mulungu/constant"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -64,6 +68,38 @@ func JSONDecode(b []byte) (map[string]interface{}, error) {
 	return results, nil
 }
 
+//ResponseToMap  Unmarshal http.Request.Body to map[string]interface{}
+func ResponseToMap(r *http.Response) (map[string]interface{}, error) {
+	defer r.Body.Close()
+
+	switch r.Header.Get(constant.HeaderContentType) {
+	case "application/xml":
+	case "application/xml; charset=utf-8":
+		return XMLMapStringInterface(r.Body)
+	case "application/json":
+	case "application/json; charset=utf-8":
+		return JSONMapStringInterface(r.Body)
+	}
+
+	return nil, fmt.Errorf("Failed to decode accepted content types [%s,%s] found (%s)",
+		"application/xml", "application/json", r.Header.Get(constant.HeaderContentType))
+}
+
+//RquestToMap  Unmarshal http.Request.Body to map[string]interface{}
+func RquestToMap(r *http.Request) (map[string]interface{}, error) {
+	defer r.Body.Close()
+
+	switch r.Header.Get(constant.HeaderContentType) {
+	case "application/xml":
+		return XMLMapStringInterface(r.Body)
+	case "application/json":
+		return JSONMapStringInterface(r.Body)
+	}
+
+	return nil, fmt.Errorf("Failed to decode request accepted request types [%s,%s]",
+		"application/xml", "application/json")
+}
+
 // JSONDecodeHTTPRequest Unmarshal http.Request.Body to interface
 func JSONDecodeHTTPRequest(r *http.Request) (map[string]interface{}, error) {
 	defer r.Body.Close()
@@ -74,6 +110,47 @@ func JSONDecodeHTTPRequest(r *http.Request) (map[string]interface{}, error) {
 func JSONDecodeHTTPResponse(r *http.Response) (map[string]interface{}, error) {
 	defer r.Body.Close()
 	return ToMapStringInterface(r.Body)
+}
+
+//XMLMapStringInterface converts xml to map[string]interface{}
+func XMLMapStringInterface(r io.Reader) (map[string]interface{}, error) {
+	bytes, err := ioutil.ReadAll(r)
+	if err == nil {
+		mv, errMapXML := mxj.NewMapXml(bytes)
+		if errMapXML != nil {
+			return mv, nil
+		}
+		return nil, errMapXML
+	}
+	return nil, err
+}
+
+//MapToXML convert map to xml
+func MapToXML(subject map[string]interface{}) ([]byte, error) {
+	b, err := mxj.Map(subject).Xml()
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
+}
+
+//JSONMapStringInterface converts io.Reader JSON content to map[string]interface
+func JSONMapStringInterface(r io.Reader) (map[string]interface{}, error) {
+	results := make(map[string]interface{})
+	decoder := json.NewDecoder(r)
+	decoder.UseNumber()
+	decodeErr := decoder.Decode(&results)
+
+	switch {
+	case decodeErr == io.EOF:
+		fmt.Println("request has no body, decoding skipped returning nil")
+		return nil, nil
+	case decodeErr != nil:
+		return nil, fmt.Errorf("Failed to decode reader, error %s", decodeErr.Error())
+	}
+
+	return results, nil
 }
 
 //ToMapStringInterface converts io.Reader to map[string]interface
