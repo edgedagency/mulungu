@@ -11,4 +11,5 @@ const (
 	HeaderAuthorisedRole            = "X-Authorised-Role"
 	HeaderTenantID                  = "X-Authorised-Tenant-ID"
 	HeaderEnvironment               = "X-Environment"
+	HeaderServiceHost               = "X-Service-Host"
 )

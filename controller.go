@@ -3,9 +3,9 @@ package mulungu
 import (
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
 
-	"github.com/edgedagency/mulungu/constant"
 	"github.com/edgedagency/mulungu/util"
 	"github.com/gorilla/mux"
 	"golang.org/x/net/context"
@@ -22,8 +22,8 @@ func (c *Controller) Data(ctx context.Context, w http.ResponseWriter, r *http.Re
 	data, err := util.JSONDecodeHTTPRequest(r)
 	if err != nil {
 		log.Errorf(ctx, "failed to decode request, error %s", err.Error())
-		c.JSONResponse(w, NewResponse(map[string]interface{}{"message": "unable to decode request", "error": err.Error()},
-			"failed to process request", true), http.StatusBadRequest)
+		// c.JSONResponse(w, NewResponse(map[string]interface{}{"message": "unable to decode request", "error": err.Error()},
+		// 	"failed to process request", true), http.StatusBadRequest)
 		return nil
 	}
 	return data
@@ -57,17 +57,26 @@ func (c *Controller) HydrateModel(ctx context.Context, readCloser io.ReadCloser,
 	return nil
 }
 
-//JSONResponse returns json response and sets right content headers
-func (c *Controller) JSONResponse(w http.ResponseWriter, responseBody interface{}, statusCode int) {
-	util.WriteJSON(w, responseBody, statusCode)
+//WriteJSON respond to request
+func (c *Controller) WriteJSON(w http.ResponseWriter, statusCode int, bytes []byte) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	w.Write(bytes)
 }
 
-//Response creates a response based on content/accept type
-func (c *Controller) Response(w http.ResponseWriter, r *http.Request, responseBody interface{}, statusCode int) {
-	switch r.Header.Get(constant.HeaderContentType) {
-	case "application/json":
-		util.WriteJSON(w, responseBody, statusCode)
-	case "application/xml":
-		util.WriteXML(w, responseBody, statusCode)
+//WriteXML respond to request
+func (c *Controller) WriteXML(w http.ResponseWriter, statusCode int, bytes []byte) {
+	w.Header().Set("Content-Type", "application/xml")
+	w.WriteHeader(statusCode)
+	w.Write(bytes)
+}
+
+//ResponseBodyToBytes obtains response body as bytes or empty
+func (c *Controller) ResponseBodyToBytes(r *http.Response) []byte {
+	bytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return []byte{}
 	}
+
+	return bytes
 }

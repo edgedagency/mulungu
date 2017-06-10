@@ -12,22 +12,22 @@ import (
 )
 
 //WriteJSON outputs json to response writer and sets up the right mimetype
-func WriteJSON(w http.ResponseWriter, responseBody interface{}, statusCode int) {
+func WriteJSON(w http.ResponseWriter, data interface{}, statusCode int) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(responseBody)
+	json.NewEncoder(w).Encode(data)
 }
 
 //WriteXML outputs interface to xml
-func WriteXML(w http.ResponseWriter, responseBody interface{}, statusCode int) {
+func WriteXML(w http.ResponseWriter, data interface{}, statusCode int) {
 	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
 	w.WriteHeader(statusCode)
-	// b, err := MapToXML(responseBody.(map[string]interface{}))
-	// if err != nil {
-	// 	w.Write([]byte("<error>failed to process data</error>"))
-	// }
+	b, err := MapToXML(data.(map[string]interface{}))
+	if err != nil {
+		w.Write([]byte("<error>failed to process data</error>"))
+	}
 
-	w.Write([]byte("<error>failed to process data</error>"))
+	w.Write(b)
 }
 
 //GeneratePath use this if you would like to generate a path based on request, excluding service. Very specific to applications developed for ibudo

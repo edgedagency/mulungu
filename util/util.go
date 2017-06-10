@@ -11,6 +11,7 @@ import (
 	"math/rand"
 	"net/http"
 	"reflect"
+	"strings"
 
 	"github.com/clbanning/mxj"
 	"github.com/edgedagency/mulungu/constant"
@@ -72,7 +73,7 @@ func JSONDecode(b []byte) (map[string]interface{}, error) {
 func ResponseToMap(r *http.Response) (map[string]interface{}, error) {
 	defer r.Body.Close()
 
-	switch r.Header.Get(constant.HeaderContentType) {
+	switch strings.ToLower(r.Header.Get(constant.HeaderContentType)) {
 	case "application/xml":
 	case "application/xml; charset=utf-8":
 		return XMLMapStringInterface(r.Body)
@@ -81,23 +82,25 @@ func ResponseToMap(r *http.Response) (map[string]interface{}, error) {
 		return JSONMapStringInterface(r.Body)
 	}
 
-	return nil, fmt.Errorf("Failed to decode accepted content types [%s,%s] found (%s)",
-		"application/xml", "application/json", r.Header.Get(constant.HeaderContentType))
+	return nil, fmt.Errorf("Response Error: Failed to decode accepted content types [%s,%s] found (%s)",
+		"application/xml", "application/json", strings.ToLower(r.Header.Get(constant.HeaderContentType)))
 }
 
 //RquestToMap  Unmarshal http.Request.Body to map[string]interface{}
 func RquestToMap(r *http.Request) (map[string]interface{}, error) {
 	defer r.Body.Close()
 
-	switch r.Header.Get(constant.HeaderContentType) {
+	switch strings.ToLower(r.Header.Get(constant.HeaderContentType)) {
 	case "application/xml":
+	case "application/xml; charset=utf-8":
 		return XMLMapStringInterface(r.Body)
 	case "application/json":
+	case "application/json; charset=utf-8":
 		return JSONMapStringInterface(r.Body)
 	}
 
-	return nil, fmt.Errorf("Failed to decode request accepted request types [%s,%s]",
-		"application/xml", "application/json")
+	return nil, fmt.Errorf("Rquest Error: Failed to decode accepted content types [%s,%s] found (%s)",
+		"application/xml", "application/json", strings.ToLower(r.Header.Get(constant.HeaderContentType)))
 }
 
 // JSONDecodeHTTPRequest Unmarshal http.Request.Body to interface
@@ -127,9 +130,13 @@ func XMLMapStringInterface(r io.Reader) (map[string]interface{}, error) {
 
 //MapToXML convert map to xml
 func MapToXML(subject map[string]interface{}) ([]byte, error) {
-	b, err := mxj.Map(subject).Xml()
+	mjxMap, err := mxj.NewMapJson([]byte(MapInterfaceToJSONString(subject)))
 	if err != nil {
 		return nil, err
+	}
+	b, mjxXMLError := mjxMap.Xml()
+	if mjxXMLError != nil {
+		return nil, mjxXMLError
 	}
 
 	return b, nil
