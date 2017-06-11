@@ -71,6 +71,36 @@ func (c *Controller) WriteXML(w http.ResponseWriter, statusCode int, bytes []byt
 	w.Write(bytes)
 }
 
+//IsAuthorized determines if request is authorized in some why
+func (c *Controller) IsAuthorised(ctx context.Context, r *http.Request) bool {
+	return util.IsAuthorised(ctx, r)
+}
+
+//NotAuthosized creates a not authorized http response
+func (c *Controller) NotAuthorized(w http.ResponseWriter, r *http.Request) {
+	c.WriteJSON(w, http.StatusUnauthorized, NewResponse().Add("message", "authorization required").JSON())
+}
+
+//Created generates a created http response with data
+func (c *Controller) Created(w http.ResponseWriter, r *http.Request, data interface{}) {
+	c.WriteJSON(w, http.StatusCreated, NewResponse().Add("message", "Record/s created").Add("data", data).JSON())
+}
+
+//Found generates a found response with data
+func (c *Controller) Found(w http.ResponseWriter, r *http.Request, data interface{}) {
+	c.WriteJSON(w, http.StatusOK, NewResponse().Add("message", "Record/s retrived").Add("data", data).JSON())
+}
+
+//NotFound generates a not found http response
+func (c *Controller) NotFound(w http.ResponseWriter, r *http.Request) {
+	c.WriteJSON(w, http.StatusNotFound, NewResponse().Add("message", "Record/s not found").JSON())
+}
+
+//Error generates a error response
+func (c *Controller) Error(w http.ResponseWriter, r *http.Request, message string, err error) {
+	c.WriteJSON(w, http.StatusInternalServerError, NewResponse().Add("message", message).Add("error", err.Error()).JSON())
+}
+
 //ResponseBodyToBytes obtains response body as bytes or empty
 func (c *Controller) ResponseBodyToBytes(r *http.Response) []byte {
 	bytes, err := ioutil.ReadAll(r.Body)
