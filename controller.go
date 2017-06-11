@@ -101,6 +101,11 @@ func (c *Controller) Error(w http.ResponseWriter, r *http.Request, message strin
 	c.WriteJSON(w, http.StatusInternalServerError, NewResponse().Add("message", message).Add("error", err.Error()).JSON())
 }
 
+//OK generates http OK response with message
+func (c *Controller) OK(w http.ResponseWriter, r *http.Request, message string) {
+	c.WriteJSON(w, http.StatusInternalServerError, NewResponse().Add("message", message).JSON())
+}
+
 //ResponseBodyToBytes obtains response body as bytes or empty
 func (c *Controller) ResponseBodyToBytes(r *http.Response) []byte {
 	bytes, err := ioutil.ReadAll(r.Body)
