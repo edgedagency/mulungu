@@ -1,27 +1,13 @@
 package mulungu
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"encoding/xml"
+	"fmt"
+	"strings"
 
-// //Response data structured used to communicate responses back to client
-// type Response struct {
-// 	Data    interface{} `json:"data"`
-// 	Message string      `json:"message"`
-// 	Error   bool        `json:"error"`
-// }
-//
-// //NewResponse web function used to create new response
-// func NewResponse(data interface{}, message string, err bool) *Response {
-// 	return &Response{Data: data, Message: message, Error: err}
-// }
-//
-// func (r *Response) JSON []byte{
-//   jData, err := json.Marshal(Data)
-// }
-//
-// //ToMap convert to map
-// func (r *Response) ToMap() map[string]interface{} {
-// 	return structs.Map(r)
-// }
+	"github.com/clbanning/mxj"
+)
 
 //Response response object
 type Response map[string]interface{}
@@ -50,4 +36,29 @@ func (r Response) JSON() []byte {
 		panic(err)
 	}
 	return data
+}
+
+//XML converts to XML presentation
+func (r Response) XML() []byte {
+	mv := mxj.Map(r)
+	data, xmlErr := mv.Xml()
+	if xmlErr != nil {
+		panic(xmlErr)
+	}
+
+	return data
+}
+
+//Format formats response based on content type
+//
+// For XML output header is attached.
+func (r Response) Format(contentType string) []byte {
+	switch strings.ToLower(contentType) {
+	case "application/xml", "application/xml; charset=utf-8":
+		return []byte(xml.Header + string(r.XML()))
+	case "application/json", "application/json; charset=utf-8":
+		return r.JSON()
+	}
+	//if all else fails dump string
+	return []byte(fmt.Sprintf("Unable to format content for request, content type %s", contentType))
 }
