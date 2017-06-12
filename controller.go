@@ -65,7 +65,7 @@ func (c *Controller) Write(ctx context.Context, w http.ResponseWriter, r *http.R
 	logger.Infof(ctx, "Base Controller", "writing content type: %s content bytes: %#v", contentType, bytes)
 
 	switch contentType {
-	case "application/xml", "application/xml; charset=utf-8":
+	case "application/xml", "application/xml; charset=utf-8", "text/xml; charset=utf-8", "text/xml":
 		logger.Infof(ctx, "Base Controller", "writing XML content bytes: %s", string(bytes))
 		c.WriteXML(ctx, w, statusCode, bytes)
 	case "application/json", "application/json; charset=utf-8":
