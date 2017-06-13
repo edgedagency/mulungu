@@ -1,6 +1,8 @@
 package configuration
 
 import (
+	"fmt"
+
 	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
@@ -59,9 +61,17 @@ func (e *Entry) Get(key string) string {
 
 //Set sets or updates a configuration
 func (e *Entry) Set(key string, value string) *Entry {
+
+	configurations := NewConfigurationEntryModel(e.Context, e.Namespace)
+	if configurations.Exists(fmt.Sprintf("key=:%s", e.Key)) == true {
+		return configurations.Update(0, e.Key, nil)
+	}
+	if configurations.Exists(fmt.Sprintf("key=:%s", e.Key)) == false {
+		return configurations.Save(e.Key, nil)
+	}
 	//set  configuration entry with key
 	// overrides existing entry, therefore check ig an entry with key exists update if true create new if false
-	return nil
+	configurations.Value = value
 }
 
 //FindAll returns all entries from datastore
@@ -86,4 +96,28 @@ func (e *Entry) FindAll(filter string) ([]*Entry, error) {
 		entries = append(entries, resultModel)
 	}
 	return entries, nil
+}
+
+//Exists returns all user from datastore
+func (e *Entry) Exists(filter string) bool {
+	logger.Debugf(u.Context, "configuration model", "checking if record exists by filter: %s", filter)
+
+	queryBuilder := query.NewQueryBuilder(e.Context)
+	queryBuilder.Build(e.Kind, filter, "")
+	queryBuilder.Query = queryBuilder.Query.Namespace(e.Namespace).KeysOnly().Limit(1)
+	//only return keys to check if somthing exists based on filter
+	results, err := e.Client().GetAll(e.Context, queryBuilder.Query, nil)
+
+	if err != nil {
+		logger.Errorf(e.Context, "configuration model", "results: %#v error %s", results, err.Error())
+		return false
+	}
+
+	logger.Debugf(u.Context, "configuration model", "results: %#v count : %v", results, len(results))
+
+	if len(results) > 0 {
+		return true
+	}
+
+	return false
 }
