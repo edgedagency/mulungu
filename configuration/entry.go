@@ -54,6 +54,7 @@ func (e *Entry) Get(key, defaultValue string) string {
 
 	logger.Debugf(e.Context, "configuration entry model", "query = %#v", query)
 	result := e.Client().Run(e.Context, query)
+
 	for {
 
 		confKey, err := result.Next(configurations)
@@ -61,12 +62,13 @@ func (e *Entry) Get(key, defaultValue string) string {
 			break
 		}
 		if err != nil {
-			logger.Errorf(e.Context, "configuration entry model", "failed to retirve record, error %s", err.Error())
+			logger.Errorf(e.Context, "configuration entry model", "failed to retirve record, error %s return default value %s", err.Error(), defaultValue)
 			return defaultValue
 		}
 		configurations.Identify(confKey)
 		logger.Debugf(e.Context, "configuration entry model", "Key=%v\n Record=%#v\n", confKey, configurations)
 	}
+
 	return configurations.Value
 }
 
