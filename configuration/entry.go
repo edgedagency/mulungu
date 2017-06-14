@@ -49,15 +49,15 @@ func GetAll(context context.Context, namespace, filter string) ([]*Entry, error)
 
 //Get retireves a configuration by key
 func (e *Entry) Get(key, defaultValue string) string {
-	configurations := NewEntryModel(e.Context, e.Namespace)
-	query := datastore.NewQuery(configurations.Kind).Filter("key=", key).Namespace(e.Namespace).Limit(1)
+	entry := NewEntryModel(e.Context, e.Namespace)
+	query := datastore.NewQuery(entry.Kind).Filter("key=", key).Namespace(e.Namespace).Limit(1)
 
 	logger.Debugf(e.Context, "configuration entry model", "query = %#v", query)
 	result := e.Client().Run(e.Context, query)
 
 	for {
 
-		confKey, err := result.Next(configurations)
+		confKey, err := result.Next(entry)
 		if err == iterator.Done {
 			break
 		}
@@ -65,11 +65,16 @@ func (e *Entry) Get(key, defaultValue string) string {
 			logger.Errorf(e.Context, "configuration entry model", "failed to retirve record, error %s return default value %s", err.Error(), defaultValue)
 			return defaultValue
 		}
-		configurations.Identify(confKey)
-		logger.Debugf(e.Context, "configuration entry model", "Key=%v\n Record=%#v\n", confKey, configurations)
+		entry.Identify(confKey)
+		logger.Debugf(e.Context, "configuration entry model", "Key=%v\n Record=%#v\n", confKey, entry)
 	}
 
-	return configurations.Value
+	if entry.IsNil() {
+		logger.Warningf(e.Context, "configuration entry model", "configuration for key %s not found in namespace %s returning defaultValue %s", key, e.Namespace, defaultValue)
+		return defaultValue
+	}
+
+	return entry.Value
 }
 
 //Get is a convience function so one can say configuration.Get(...)
