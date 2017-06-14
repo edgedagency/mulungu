@@ -8,6 +8,12 @@ import (
 	"google.golang.org/appengine/log"
 )
 
+//query constants
+const (
+	NoSorting   = ""
+	NoFiltering = ""
+)
+
 //Builder struct holding query building logic
 type Builder struct {
 	Context context.Context
