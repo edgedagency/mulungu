@@ -48,7 +48,7 @@ func GetAll(context context.Context, namespace, filter string) ([]*Entry, error)
 }
 
 //Get retireves a configuration by key
-func (e *Entry) Get(key string) string {
+func (e *Entry) Get(key, defaultValue string) string {
 	configurations := NewEntryModel(e.Context, e.Namespace)
 	query := datastore.NewQuery(configurations.Kind).Filter("key=", key).Namespace(e.Namespace).Limit(1)
 
@@ -62,7 +62,7 @@ func (e *Entry) Get(key string) string {
 		}
 		if err != nil {
 			logger.Errorf(e.Context, "configuration entry model", "failed to retirve record, error %s", err.Error())
-			return ""
+			return defaultValue
 		}
 		configurations.Identify(confKey)
 		logger.Debugf(e.Context, "configuration entry model", "Key=%v\n Record=%#v\n", confKey, configurations)
@@ -72,9 +72,9 @@ func (e *Entry) Get(key string) string {
 
 //Get is a convience function so one can say configuration.Get(...)
 //
-func Get(context context.Context, namespace, key string) string {
+func Get(context context.Context, namespace, key, defaultValue string) string {
 	e.Init(context, "ConfigurationEntry", namespace)
-	return e.Get(key)
+	return e.Get(key, defaultValue)
 }
 
 // //Set sets or updates a configuration
