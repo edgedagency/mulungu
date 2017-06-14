@@ -10,6 +10,12 @@ import (
 	"github.com/edgedagency/mulungu/query"
 )
 
+var e *Entry
+
+func init() {
+	e = &Entry{}
+}
+
 //Entry this is a representation of a configuration entry
 //
 //e.g. email.from.address = mince@example.com
@@ -21,8 +27,8 @@ type Entry struct {
 	Value string `json:"value" datastore:"value"`
 }
 
-//NewConfigurationEntryModel instantiates a new user model
-func NewConfigurationEntryModel(context context.Context, namespace string) *Entry {
+//NewEntryModel instantiates a new user model
+func NewEntryModel(context context.Context, namespace string) *Entry {
 	m := &Entry{}
 	m.Init(context, "ConfigurationEntry", namespace)
 	return m
@@ -34,9 +40,16 @@ func (e *Entry) GetAll(filter string) ([]*Entry, error) {
 	return e.FindAll(filter)
 }
 
+//GetAll is a convience function so one can say configuration.GetAll(...)
+//
+func GetAll(context context.Context, namespace, filter string) ([]*Entry, error) {
+	e.Init(context, "ConfigurationEntry", namespace)
+	return e.FindAll(filter)
+}
+
 //Get retireves a configuration by key
 func (e *Entry) Get(key string) string {
-	configurations := NewConfigurationEntryModel(e.Context, e.Namespace)
+	configurations := NewEntryModel(e.Context, e.Namespace)
 	query := datastore.NewQuery(configurations.Kind).Filter("key=", key).Namespace(e.Namespace).Limit(1)
 
 	logger.Debugf(e.Context, "configuration entry model", "query = %#v", query)
@@ -55,6 +68,13 @@ func (e *Entry) Get(key string) string {
 		logger.Debugf(e.Context, "configuration entry model", "Key=%v\n Record=%#v\n", confKey, configurations)
 	}
 	return configurations.Value
+}
+
+//Get is a convience function so one can say configuration.Get(...)
+//
+func Get(context context.Context, namespace, key string) string {
+	e.Init(context, "ConfigurationEntry", namespace)
+	return e.Get(key)
 }
 
 // //Set sets or updates a configuration
@@ -81,7 +101,7 @@ func (e *Entry) FindAll(filter string) ([]*Entry, error) {
 	results := e.Run(queryBuilder.Query.Namespace(e.Namespace))
 
 	for {
-		resultModel := NewConfigurationEntryModel(e.Context, e.Namespace)
+		resultModel := NewEntryModel(e.Context, e.Namespace)
 		key, err := results.Next(resultModel)
 		if err == iterator.Done {
 			break
