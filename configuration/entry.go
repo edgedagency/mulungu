@@ -1,6 +1,8 @@
 package configuration
 
 import (
+	"strings"
+
 	"cloud.google.com/go/datastore"
 	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
@@ -50,7 +52,7 @@ func GetAll(context context.Context, namespace, filter string) ([]*Entry, error)
 //Get retireves a configuration by key
 func (e *Entry) Get(key, defaultValue string) string {
 	entry := NewEntryModel(e.Context, e.Namespace)
-	query := datastore.NewQuery(entry.Kind).Filter("key=", key).Namespace(e.Namespace).Limit(1)
+	query := datastore.NewQuery(entry.Kind).Filter("key=", strings.TrimSpace(key)).Namespace(e.Namespace).Limit(1)
 
 	logger.Debugf(e.Context, "configuration entry model", "query = %#v", query)
 	result := e.Client().Run(e.Context, query)
