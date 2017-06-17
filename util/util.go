@@ -185,44 +185,6 @@ func MD5Hash(text string) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-//ReflectKind returns kind of interface using reflection
-func ReflectKind(subject interface{}) reflect.Kind {
-	typeKind := reflect.ValueOf(subject).Type().Kind()
-	return typeKind
-}
-
-//IsString returns true if interface passed is an array
-func IsString(subject interface{}) bool {
-	if ReflectKind(subject) == reflect.String {
-		return true
-	}
-	return false
-}
-
-//IsArray returns true if interface passed is an array
-func IsArray(subject interface{}) bool {
-	if ReflectKind(subject) == reflect.Array {
-		return true
-	}
-	return false
-}
-
-//IsSlice returns true if interface passed is a slice
-func IsSlice(subject interface{}) bool {
-	if ReflectKind(subject) == reflect.Slice {
-		return true
-	}
-	return false
-}
-
-//IsMap returns true if interface passed is a map
-func IsMap(subject interface{}) bool {
-	if ReflectKind(subject) == reflect.Map {
-		return true
-	}
-	return false
-}
-
 //encryption.util
 
 //ComparePlainAndHashed compares a plain non encrypted byte to encrytpted byte
