@@ -1,6 +1,7 @@
 package util
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 
@@ -26,12 +27,24 @@ func IsDatastoreAcceptableKind(subject interface{}, multiple bool) bool {
 	kind := ReflectDetermineKind(subject)
 
 	fmt.Println("IsDatastoreAcceptableKind : Kind " + kind.String())
+
 	switch kind {
 	case reflect.Bool, reflect.String, reflect.Int, reflect.Int8,
-		reflect.Int16, reflect.Int32, reflect.Int64, reflect.Slice:
+		reflect.Int16, reflect.Int32, reflect.Int64, reflect.Slice,
+		reflect.Interface, reflect.Array, reflect.Float32, reflect.Float64:
 		return true
 	}
 	return false
+}
+
+//DatastoreConvertJSONNumberToSupportedSlice converts []jsonNumber to []interface
+func DatastoreConvertJSONNumberToSupportedSlice(subject interface{}) []interface{} {
+	interfaceSlice := make([]interface{}, len(subject.([]interface{})))
+	for index, value := range subject.([]interface{}) {
+		interfaceSlice[index] = (value.(json.Number)).String()
+	}
+
+	return interfaceSlice
 }
 
 //GetDatastoreProperty creates a datastore property

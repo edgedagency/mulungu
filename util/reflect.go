@@ -26,6 +26,22 @@ func ReflectKind(subject interface{}) reflect.Kind {
 	return ReflectType(subject).Kind()
 }
 
+//ReflectIsKindJSONNumber determines if json number
+func ReflectIsKindJSONNumber(subject interface{}) bool {
+
+	if reflect.TypeOf(subject) == reflect.TypeOf((*new([]json.Number))) {
+		return true
+	} else if reflect.TypeOf(subject) == reflect.TypeOf((*new(json.Number))) {
+		return true
+	} else if reflect.TypeOf(subject) == reflect.TypeOf(([]interface{})(nil)) {
+		if reflect.TypeOf(subject.([]interface{})[0]) == reflect.TypeOf((*new(json.Number))) {
+			return true
+		}
+	}
+
+	return false
+}
+
 //IsString returns true if interface passed is an array
 func IsString(subject interface{}) bool {
 	if ReflectKind(subject) == reflect.String {
@@ -68,9 +84,9 @@ func IsBool(subject interface{}) bool {
 
 //ElemKind returns kind of type elem
 func ElemKind(subject interface{}) reflect.Kind {
-
+	//json.Number in slices panic, this is to help skip
 	if reflect.TypeOf(subject) == reflect.TypeOf((*new([]json.Number))) {
-		return reflect.Invalid
+		return reflect.String
 	}
 
 	elemKind := reflect.TypeOf(subject).Elem().Kind()
