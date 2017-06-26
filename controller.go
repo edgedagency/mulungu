@@ -59,6 +59,13 @@ func (c *Controller) HydrateModel(ctx context.Context, readCloser io.ReadCloser,
 	return nil
 }
 
+//WriteRaw enables on to send raw content and gives control over content type
+func (c *Controller) WriteRaw(ctx context.Context, w http.ResponseWriter, r *http.Request, statusCode int, bytes []byte, contentType string) {
+	w.Header().Set("Content-Type", contentType)
+	w.WriteHeader(statusCode)
+	w.Write(bytes)
+}
+
 //Write respond to request
 func (c *Controller) Write(ctx context.Context, w http.ResponseWriter, r *http.Request, statusCode int, bytes []byte) {
 	contentType := strings.TrimSpace(strings.ToLower(r.Header.Get(constant.HeaderContentType)))

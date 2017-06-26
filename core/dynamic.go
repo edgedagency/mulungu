@@ -36,3 +36,11 @@ func (d *Dynamic) AppendProperty(propertise []datastore.Property, name string, i
 	}
 	return propertise
 }
+
+//GetString returns dictionary value as string
+func (d *Dynamic) GetString(key string) string {
+	if val, ok := (*d)[key]; ok {
+		return val.(string)
+	}
+	return ""
+}

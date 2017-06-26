@@ -27,8 +27,8 @@ type Model struct {
 	Namespace    string          `json:"-" datastore:"-"`
 	Kind         string          `json:"-" datastore:"-"`
 	Context      context.Context `json:"-" datastore:"-"`
-
-	client *datastore.Client
+	Data         Dynamic         `json:"data,omitempty" datastore:"data,omitempty"`
+	client       *datastore.Client
 }
 
 //Validate determins if model is valid based on validation tags using https://github.com/asaskevich/govalidator
