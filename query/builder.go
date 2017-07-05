@@ -42,6 +42,7 @@ func (b *Builder) Filter(filter string) {
 			log.Debugf(b.Context, "filterPart: %s", filterPart)
 			queryParts := strings.Split(filterPart, ":")
 			log.Debugf(b.Context, "filterParts: filter: %s value:%s", queryParts[0], queryParts[1])
+
 			b.Query = b.Query.Filter(queryParts[0], queryParts[1])
 		}
 	}
