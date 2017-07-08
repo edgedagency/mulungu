@@ -11,21 +11,13 @@ import (
 //IsDatastoreAcceptableType checks if type and type elements are acceptable to datastore
 func IsDatastoreAcceptableType(subject interface{}) bool {
 	kind := ReflectKind(subject)
-
 	fmt.Println(fmt.Printf("checking is subject is datastore acceptable : subject > %#v kind > %s ", subject, kind.String()))
-
-	if kind != reflect.Slice {
-		fmt.Println("subject not a slice")
-		return IsDatastoreAcceptableKind(subject, false)
-	}
-	fmt.Println("subject is a slice/map/array type")
-	return IsDatastoreAcceptableKind(subject, true)
+	return IsDatastoreAcceptableKind(subject)
 }
 
 //IsDatastoreAcceptableKind checks if type and type elements are acceptable to datastore
-func IsDatastoreAcceptableKind(subject interface{}, multiple bool) bool {
+func IsDatastoreAcceptableKind(subject interface{}) bool {
 	kind := ReflectDetermineKind(subject)
-
 	fmt.Println("IsDatastoreAcceptableKind : Kind " + kind.String())
 
 	switch kind {
@@ -50,4 +42,18 @@ func DatastoreConvertJSONNumberToSupportedSlice(subject interface{}) []interface
 //GetDatastoreProperty creates a datastore property
 func GetDatastoreProperty(name string, index bool, value interface{}) datastore.Property {
 	return datastore.Property{Name: name, NoIndex: index, Value: value}
+}
+
+//GetDatastoreProperties returns multiple properties
+func GetDatastoreProperties(subject []interface{}) []datastore.Property {
+	properties := []datastore.Property{}
+	for _, item := range subject {
+		if ReflectKind(item) == reflect.Map {
+			for key, value := range item.(map[string]interface{}) {
+				fmt.Println(fmt.Sprintf("creating value ->>> %s %#v", key, value))
+				properties = append(properties, GetDatastoreProperty(key, false, value))
+			}
+		}
+	}
+	return properties
 }

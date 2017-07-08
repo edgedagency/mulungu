@@ -22,6 +22,7 @@ type Model struct {
 	ID           int64           `json:"id,omitempty" datastore:"-"`
 	TenantID     int64           `json:"tenantID,omitempty" datastore:"tenantID,omitempty"`
 	OwnerID      int64           `json:"ownerId,omitempty" datastore:"ownerId,omitempty"`
+	ParentID     int64           `json:"parentId,omitempty" datastore:"parentId,omitempty"`
 	CreatedDate  time.Time       `json:"createdDate,omitempty" datastore:"createdDate,omitempty"`
 	ModifiedDate time.Time       `json:"modifiedDate,omitempty" datastore:"modifiedDate,omitempty"`
 	Namespace    string          `json:"-" datastore:"-"`

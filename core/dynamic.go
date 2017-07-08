@@ -1,6 +1,8 @@
 package core
 
 import (
+	"reflect"
+
 	"cloud.google.com/go/datastore"
 	"github.com/edgedagency/mulungu/util"
 )
@@ -31,6 +33,8 @@ func (d *Dynamic) AppendProperty(propertise []datastore.Property, name string, i
 	if util.IsDatastoreAcceptableType(value) {
 		if util.ReflectIsKindJSONNumber(value) == true {
 			return append(propertise, util.GetDatastoreProperty(name, index, util.DatastoreConvertJSONNumberToSupportedSlice(value)))
+		} else if util.ReflectType(value) == reflect.TypeOf([]interface{}(nil)) {
+			//return append(propertise, util.GetDatastoreProperty(name, index, util.GetDatastoreProperties(value.([]interface{}))))
 		}
 		return append(propertise, util.GetDatastoreProperty(name, index, value))
 	}
