@@ -4,6 +4,8 @@ import (
 	"strings"
 
 	"cloud.google.com/go/datastore"
+	"github.com/asaskevich/govalidator"
+	"github.com/edgedagency/mulungu/util"
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/log"
 )
@@ -42,10 +44,18 @@ func (b *Builder) Filter(filter string) {
 			log.Debugf(b.Context, "filterPart: %s", filterPart)
 			queryParts := strings.Split(filterPart, ":")
 			log.Debugf(b.Context, "filterParts: filter: %s value:%s", queryParts[0], queryParts[1])
-
-			b.Query = b.Query.Filter(queryParts[0], queryParts[1])
+			b.Query = b.Query.Filter(queryParts[0], b.convert(queryParts[1]))
 		}
 	}
 
 	log.Debugf(b.Context, "query after filters: %#v", b.Query)
+}
+
+func (b *Builder) convert(subject interface{}) interface{} {
+	if govalidator.IsInt(subject.(string)) {
+		return util.StringToInt(subject.(string))
+	} else if govalidator.IsFloat(subject.(string)) {
+		return util.StringToInt64(subject.(string))
+	}
+	return subject
 }
