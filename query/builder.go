@@ -52,6 +52,8 @@ func (b *Builder) Filter(filter string) {
 }
 
 func (b *Builder) convert(subject interface{}) interface{} {
+	log.Debugf(b.Context, "attempting to convert to number type if necessary %#v", subject)
+
 	if govalidator.IsInt(subject.(string)) {
 		return util.StringToInt(subject.(string))
 	} else if govalidator.IsFloat(subject.(string)) {

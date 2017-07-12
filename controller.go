@@ -104,12 +104,12 @@ func (c *Controller) WriteXML(ctx context.Context, w http.ResponseWriter, status
 	w.Write(bytes)
 }
 
-//IsAuthorized determines if request is authorized in some why
+//IsAuthorised determines if request is authorized in some why
 func (c *Controller) IsAuthorised(ctx context.Context, r *http.Request) bool {
 	return util.IsAuthorised(ctx, r)
 }
 
-//NotAuthosized creates a not authorized http response
+//NotAuthorized creates a not authorized http response
 func (c *Controller) NotAuthorized(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	c.Write(ctx, w, r, http.StatusUnauthorized, NewResponse().Add("message", "authorization required").Format(r.Header.Get(constant.HeaderContentType)))
 }

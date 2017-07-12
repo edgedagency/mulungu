@@ -9,6 +9,7 @@ import (
 
 	"cloud.google.com/go/datastore"
 	valid "github.com/asaskevich/govalidator"
+	"github.com/edgedagency/mulungu/constant"
 	"github.com/edgedagency/mulungu/logger"
 	"github.com/edgedagency/mulungu/util"
 	"golang.org/x/net/context"
@@ -29,6 +30,7 @@ type Model struct {
 	Kind         string          `json:"-" datastore:"-"`
 	Context      context.Context `json:"-" datastore:"-"`
 	Data         Dynamic         `json:"data,omitempty" datastore:"data,omitempty"`
+	Status       constant.Status `json:"status" datastore:"status"`
 	client       *datastore.Client
 }
 
