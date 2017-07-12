@@ -17,7 +17,6 @@ import (
 
 //Controller provides basic controller functionionlity
 type Controller struct {
-	//Config *configuration.Config
 }
 
 //Data returns request body as map[string]interface{}
