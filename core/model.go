@@ -22,15 +22,15 @@ type Model struct {
 	Key          *datastore.Key  `json:"key,omitempty" datastore:"__key__,omitempty"`
 	ID           int64           `json:"id,omitempty" datastore:"-"`
 	TenantID     int64           `json:"tenantID,omitempty" datastore:"tenantID,omitempty"`
-	OwnerID      int64           `json:"ownerId,omitempty" datastore:"ownerId,omitempty"`
-	ParentID     int64           `json:"parentId,omitempty" datastore:"parentId,omitempty"`
+	OwnerID      int64           `json:"ownerID,omitempty" datastore:"ownerID,omitempty"`
+	ParentID     int64           `json:"parentID,omitempty" datastore:"parentID,omitempty"`
+	Data         Dynamic         `json:"data,omitempty" datastore:"data,omitempty"`
+	Status       constant.Status `json:"status" datastore:"status"`
 	CreatedDate  time.Time       `json:"createdDate,omitempty" datastore:"createdDate,omitempty"`
 	ModifiedDate time.Time       `json:"modifiedDate,omitempty" datastore:"modifiedDate,omitempty"`
 	Namespace    string          `json:"-" datastore:"-"`
 	Kind         string          `json:"-" datastore:"-"`
 	Context      context.Context `json:"-" datastore:"-"`
-	Data         Dynamic         `json:"data,omitempty" datastore:"data,omitempty"`
-	Status       constant.Status `json:"status" datastore:"status"`
 	client       *datastore.Client
 }
 

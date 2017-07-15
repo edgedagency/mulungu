@@ -4,6 +4,8 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/asaskevich/govalidator"
 )
 
 //StringContains checks if a string contains any of the pradicates send
@@ -47,4 +49,13 @@ func ToString(subject interface{}) string {
 	}
 
 	return ""
+}
+
+func NumberizeString(subject interface{}) interface{} {
+	if govalidator.IsInt(subject.(string)) {
+		return StringToInt(subject.(string))
+	} else if govalidator.IsFloat(subject.(string)) {
+		return StringToInt64(subject.(string))
+	}
+	return subject
 }
