@@ -9,7 +9,6 @@ import (
 
 	"cloud.google.com/go/datastore"
 	valid "github.com/asaskevich/govalidator"
-	"github.com/edgedagency/mulungu/constant"
 	"github.com/edgedagency/mulungu/logger"
 	"github.com/edgedagency/mulungu/util"
 	"golang.org/x/net/context"
@@ -25,7 +24,7 @@ type Model struct {
 	OwnerID      int64           `json:"ownerID,omitempty" datastore:"ownerID,omitempty"`
 	ParentID     int64           `json:"parentID,omitempty" datastore:"parentID,omitempty"`
 	Data         Dynamic         `json:"data,omitempty" datastore:"data,omitempty"`
-	Status       constant.Status `json:"status" datastore:"status"`
+	Status       string          `json:"status" datastore:"status"`
 	CreatedDate  time.Time       `json:"createdDate,omitempty" datastore:"createdDate,omitempty"`
 	ModifiedDate time.Time       `json:"modifiedDate,omitempty" datastore:"modifiedDate,omitempty"`
 	Namespace    string          `json:"-" datastore:"-"`
