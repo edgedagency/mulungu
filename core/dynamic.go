@@ -23,7 +23,9 @@ func (d *Dynamic) Load(dp []datastore.Property) error {
 func (d *Dynamic) Save() ([]datastore.Property, error) {
 	propertise := []datastore.Property{}
 	for name, value := range *d {
-		propertise = d.AppendProperty(propertise, name, true, value)
+		if value != nil && name != "" {
+			propertise = d.AppendProperty(propertise, name, true, value)
+		}
 	}
 	return propertise, nil
 }
