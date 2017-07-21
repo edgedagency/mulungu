@@ -36,7 +36,7 @@ func (d *Dynamic) AppendProperty(propertise []datastore.Property, name string, i
 		if util.ReflectIsKindJSONNumber(value) == true {
 			return append(propertise, util.GetDatastoreProperty(name, index, util.DatastoreConvertJSONNumberToSupportedSlice(value)))
 		} else if util.ReflectType(value) == reflect.TypeOf([]interface{}(nil)) {
-			//return append(propertise, util.GetDatastoreProperty(name, index, util.GetDatastoreProperties(value.([]interface{}))))
+			return append(propertise, datastore.Property{Name: name, NoIndex: true, Value: util.MapToJSONString(value.(map[string]string))})
 		}
 		return append(propertise, util.GetDatastoreProperty(name, index, value))
 	}
