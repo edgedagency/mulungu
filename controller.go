@@ -124,6 +124,11 @@ func (c *Controller) Found(ctx context.Context, w http.ResponseWriter, r *http.R
 	c.Write(ctx, w, r, http.StatusOK, NewResponse().Add("message", "Record/s retrived").Add("data", data).Format(r.Header.Get(constant.HeaderContentType)))
 }
 
+//Updated generates a updated response with data
+func (c *Controller) Updated(ctx context.Context, w http.ResponseWriter, r *http.Request, data interface{}) {
+	c.Write(ctx, w, r, http.StatusOK, NewResponse().Add("message", "Record/s updated").Add("data", data).Format(r.Header.Get(constant.HeaderContentType)))
+}
+
 //NotFound generates a not found http response
 func (c *Controller) NotFound(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	c.Write(ctx, w, r, http.StatusNotFound, NewResponse().Add("message", "Record/s not found").Format(r.Header.Get(constant.HeaderContentType)))
