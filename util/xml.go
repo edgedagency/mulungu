@@ -1,6 +1,9 @@
 package util
 
-import "encoding/xml"
+import (
+	"bytes"
+	"encoding/xml"
+)
 
 //ToXML converts interface structure to xml
 func ToXML(subject interface{}) []byte {
@@ -10,6 +13,14 @@ func ToXML(subject interface{}) []byte {
 	}
 
 	return []byte(xml.Header + string(output))
+}
+
+//EscapeXML escapes XML with escapeText xml function
+func EscapeXML(subject []byte) []byte {
+	strBuffer := new(bytes.Buffer)
+	xml.EscapeText(strBuffer, subject)
+
+	return strBuffer.Bytes()
 }
 
 //ToStruct converts XML data to structure
