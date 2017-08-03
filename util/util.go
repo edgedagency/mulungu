@@ -47,6 +47,14 @@ func MapInterfaceToJSONString(subject map[string]interface{}) string {
 	return string(bytes)
 }
 
+func JSONInterface(subject interface{}) string {
+	bytes, err := json.Marshal(subject)
+	if err != nil {
+		return ""
+	}
+	return string(bytes)
+}
+
 //JSONStringToMap convert string map[string]string
 func JSONStringToMap(subject string) map[string]string {
 	outputMap := make(map[string]string)

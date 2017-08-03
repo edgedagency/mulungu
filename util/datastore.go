@@ -23,7 +23,7 @@ func IsDatastoreAcceptableKind(subject interface{}) bool {
 	switch kind {
 	case reflect.Bool, reflect.String, reflect.Int, reflect.Int8,
 		reflect.Int16, reflect.Int32, reflect.Int64, reflect.Slice,
-		reflect.Interface, reflect.Array, reflect.Float32, reflect.Float64:
+		reflect.Interface, reflect.Array, reflect.Float32, reflect.Float64, reflect.Map:
 		return true
 	}
 	return false
@@ -50,7 +50,7 @@ func GetDatastoreProperties(subject []interface{}) []datastore.Property {
 	for _, item := range subject {
 		if ReflectKind(item) == reflect.Map {
 			for key, value := range item.(map[string]interface{}) {
-				fmt.Println(fmt.Sprintf("creating value ->>> %s %#v", key, value))
+				// fmt.Println(fmt.Sprintf("creating value ->>> %s %#v", key, value))
 				properties = append(properties, GetDatastoreProperty(key, false, value))
 			}
 		}

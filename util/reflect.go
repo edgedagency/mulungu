@@ -84,12 +84,20 @@ func IsBool(subject interface{}) bool {
 
 //ElemKind returns kind of type elem
 func ElemKind(subject interface{}) reflect.Kind {
+	var elemKind reflect.Kind
 	//json.Number in slices panic, this is to help skip
 	if reflect.TypeOf(subject) == reflect.TypeOf((*new([]json.Number))) {
-		return reflect.String
+		elemKind = reflect.String
+	} else if reflect.TypeOf(subject) == reflect.TypeOf([]interface{}(nil)) {
+		elemKind = reflect.TypeOf(subject).Elem().Kind()
+		//FIXME: make recursive
+		if elemKind == reflect.Interface {
+			//inconclusive, dig deeper
+			elemKind = ReflectKind(subject.([]interface{})[0])
+		}
+
 	}
 
-	elemKind := reflect.TypeOf(subject).Elem().Kind()
 	return elemKind
 }
 
