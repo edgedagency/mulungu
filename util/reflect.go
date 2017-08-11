@@ -34,8 +34,10 @@ func ReflectIsKindJSONNumber(subject interface{}) bool {
 	} else if reflect.TypeOf(subject) == reflect.TypeOf((*new(json.Number))) {
 		return true
 	} else if reflect.TypeOf(subject) == reflect.TypeOf(([]interface{})(nil)) {
-		if reflect.TypeOf(subject.([]interface{})[0]) == reflect.TypeOf((*new(json.Number))) {
-			return true
+		if len(subject.([]interface{})) > 0 {
+			if reflect.TypeOf(subject.([]interface{})[0]) == reflect.TypeOf((*new(json.Number))) {
+				return true
+			}
 		}
 	}
 
@@ -93,7 +95,9 @@ func ElemKind(subject interface{}) reflect.Kind {
 		//FIXME: make recursive
 		if elemKind == reflect.Interface {
 			//inconclusive, dig deeper
-			elemKind = ReflectKind(subject.([]interface{})[0])
+			if len(subject.([]interface{})) > 0 {
+				elemKind = ReflectKind(subject.([]interface{})[0])
+			}
 		}
 
 	}
