@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/edgedagency/mulungu/constant"
+	"github.com/edgedagency/mulungu/logger"
 	"github.com/edgedagency/mulungu/middleware"
 	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
@@ -51,7 +53,20 @@ func (s *AppEngine) HandlerFunc(path string, f func(w http.ResponseWriter, r *ht
 
 //Context returns context from request
 func (s *AppEngine) Context(r *http.Request) context.Context {
-	return appengine.NewContext(r)
+	context := appengine.NewContext(r)
+	//wrap context in namespace if namespace is on request
+	namespace := r.Header.Get(constant.HeaderNamespace)
+	if namespace != "" {
+		logger.Debugf(context, "appengine server", "wrapping context with namespace %s", namespace)
+		wrappedContext, wrappingNamespaceError := appengine.Namespace(context, namespace)
+		if wrappingNamespaceError != nil {
+			logger.Criticalf(context, "appengine server", "failed to wrap namespace in context %s", wrappingNamespaceError.Error())
+		} else {
+			return wrappedContext
+		}
+	}
+
+	return context
 }
 
 //AppEngineServiceURL this returns an app spot host

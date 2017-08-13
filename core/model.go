@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
+	"google.golang.org/appengine/search"
 )
 
 //Model element used to interact with datastore
@@ -179,4 +181,21 @@ func (m *Model) Timestamp() {
 //IsNil checks to see if this model is empty, since model can't be compared to nil
 func (m *Model) IsNil() bool {
 	return m.CreatedDate.IsZero() == true && m.ModifiedDate.IsZero() == true && m.Key == nil
+}
+
+//IndexPut creates a search index
+func (m *Model) IndexPut(id int64, kind string, src interface{}) error {
+	logger.Debugf(m.Context, "model", "creating search index, kind %s,  id %s", kind, id)
+	index, openError := search.Open(kind)
+
+	if openError != nil {
+		logger.Errorf(m.Context, "model", "failed to open search index, %s", openError.Error())
+		return openError
+	}
+	_, putError := index.Put(m.Context, strconv.FormatInt(id, 10), src)
+	if putError != nil {
+		logger.Errorf(m.Context, "model", "failed to create search index %s", putError.Error())
+		return putError
+	}
+	return nil
 }
