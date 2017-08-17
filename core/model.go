@@ -185,17 +185,37 @@ func (m *Model) IsNil() bool {
 
 //IndexPut creates a search index
 func (m *Model) IndexPut(id int64, kind string, src interface{}) error {
-	logger.Debugf(m.Context, "model", "creating search index, kind %s,  id %s", kind, id)
+	indexID := strconv.FormatInt(id, 10)
+
+	logger.Debugf(m.Context, "model", "creating search index, kind %s,  id %s", kind, indexID)
 	index, openError := search.Open(kind)
 
 	if openError != nil {
 		logger.Errorf(m.Context, "model", "failed to open search index, %s", openError.Error())
 		return openError
 	}
-	_, putError := index.Put(m.Context, strconv.FormatInt(id, 10), src)
+	_, putError := index.Put(m.Context, indexID, src)
 	if putError != nil {
 		logger.Errorf(m.Context, "model", "failed to create search index %s", putError.Error())
 		return putError
 	}
+	return nil
+}
+
+//IndexDelete removes item from search index
+func (m *Model) IndexDelete(id int64, kind string) error {
+	indexID := strconv.FormatInt(id, 10)
+	index, openError := search.Open(kind)
+	if openError != nil {
+		logger.Errorf(m.Context, "model", "failed to open search index, %s", openError.Error())
+		return openError
+	}
+
+	deleteError := index.Delete(m.Context, indexID)
+	if deleteError != nil {
+		logger.Warningf(m.Context, "model", "failed to delete search index %s with id %s", deleteError.Error(), indexID)
+		return deleteError
+	}
+
 	return nil
 }
