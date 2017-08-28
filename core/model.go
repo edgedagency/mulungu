@@ -26,7 +26,7 @@ type Model struct {
 	OwnerID      int64           `json:"ownerID,omitempty" datastore:"ownerID,omitempty"`
 	ParentID     int64           `json:"parentID,omitempty" datastore:"parentID,omitempty"`
 	Data         Dynamic         `json:"data,omitempty" datastore:"data,omitempty"`
-	Status       string          `json:"status" datastore:"status"`
+	Status       string          `json:"status,omitempty" datastore:"status,omitempty"`
 	CreatedDate  time.Time       `json:"createdDate,omitempty" datastore:"createdDate,omitempty"`
 	ModifiedDate time.Time       `json:"modifiedDate,omitempty" datastore:"modifiedDate,omitempty"`
 	Namespace    string          `json:"-" datastore:"-"`

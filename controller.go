@@ -2,6 +2,7 @@ package mulungu
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -81,6 +82,20 @@ func (c *Controller) Write(ctx context.Context, w http.ResponseWriter, r *http.R
 		logger.Infof(ctx, "Base Controller", "writing Text content: %s", string(bytes))
 		c.WriteText(ctx, w, statusCode, bytes)
 	}
+}
+
+//WriteError outputs error based returned service error codes
+func (c *Controller) WriteError(ctx context.Context, w http.ResponseWriter, r *http.Request, errCode constant.ErrorCode, err error) {
+	switch errCode {
+	default:
+		c.Write(ctx, w, r, http.StatusInternalServerError, NewResponse().Add("message", "failed to create record").Format(r.Header.Get(constant.HeaderContentType)))
+	case constant.ErrDuplicate:
+		c.Write(ctx, w, r, http.StatusConflict, NewResponse().Add("message", fmt.Sprintf("failed to create record, %s", err.Error())).Format(r.Header.Get(constant.HeaderContentType)))
+	case constant.ErrFailedValidation:
+	case constant.ErrFailedBusinessRules:
+		c.Write(ctx, w, r, http.StatusBadRequest, NewResponse().Add("message", fmt.Sprintf("failed to create record, %s", err.Error())).Format(r.Header.Get(constant.HeaderContentType)))
+	}
+	return
 }
 
 //WriteText respond to request

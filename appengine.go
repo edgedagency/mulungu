@@ -16,6 +16,9 @@ import (
 //AppEngineServer representation of Google App Engine Server
 var AppEngineServer *AppEngine
 
+//Runnning indicates that server is running
+var Runnning = false
+
 func init() {
 	AppEngineServer = NewAppEngine()
 }
@@ -33,7 +36,10 @@ func NewAppEngine() *AppEngine {
 
 //Start sets up http handler with register handlers
 func (s *AppEngine) Start() {
-	http.Handle("/", s.chain.Then(s.router))
+	if Runnning == false {
+		http.Handle("/", s.chain.Then(s.router))
+		Runnning = true
+	}
 }
 
 //Middleware registers middlewares
