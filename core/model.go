@@ -29,6 +29,8 @@ type Model struct {
 	Status       string          `json:"status,omitempty" datastore:"status,omitempty"`
 	CreatedDate  time.Time       `json:"createdDate,omitempty" datastore:"createdDate,omitempty"`
 	ModifiedDate time.Time       `json:"modifiedDate,omitempty" datastore:"modifiedDate,omitempty"`
+	CreatedBy    int64           `json:"createdBy,omitempty" datastore:"createdBy,omitempty"`
+	ModifiedBy   int64           `json:"modifiedBy,omitempty" datastore:"modifiedBy,omitempty"`
 	Namespace    string          `json:"-" datastore:"-"`
 	Kind         string          `json:"-" datastore:"-"`
 	Context      context.Context `json:"-" datastore:"-"`

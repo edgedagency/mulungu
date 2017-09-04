@@ -6,6 +6,14 @@ import (
 	"github.com/gorilla/context"
 )
 
+// type RequestHandler struct {
+// 	Request *http.Request
+// }
+//
+// func (r *RequestHandler) Context() context.Context {
+//
+// }
+
 //ContextSetValue set a value in context
 func ContextSetValue(r *http.Request, key interface{}, val interface{}) {
 	context.Set(r, key, val)
