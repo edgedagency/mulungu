@@ -60,7 +60,6 @@ func (s *AppEngine) HandlerFunc(path string, f func(w http.ResponseWriter, r *ht
 //Context returns context from request
 func (s *AppEngine) Context(r *http.Request) context.Context {
 	context := appengine.NewContext(r)
-
 	//wrap context in namespace if namespace is on request
 	namespace := r.Header.Get(constant.HeaderNamespace)
 	if namespace != "" {

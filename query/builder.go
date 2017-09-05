@@ -49,3 +49,8 @@ func (b *Builder) Filter(filter string) {
 
 	log.Debugf(b.Context, "query after filters: %#v", b.Query)
 }
+
+//Order addds order by clause
+func (b *Builder) Order(order string) {
+	b.Query = b.Query.Order(order)
+}
