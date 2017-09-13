@@ -96,3 +96,25 @@ func PubSubCreateTopicSubscription(ctx context.Context, topicID, endpoint string
 
 	return subscription, nil
 }
+
+//PubSubDeleteTopicSubscription delets a topic subscription
+func PubSubDeleteTopicSubscription(ctx context.Context, subscriptionID string) (*pubsub.Subscription, error) {
+	pubsubClient, pubsubClientErr := PubSubClient(ctx)
+	if pubsubClientErr != nil {
+		logger.Errorf(ctx, "pubsub util", "Failed to create client: %v", pubsubClientErr)
+		return nil, pubsubClientErr
+	}
+	defer pubsubClient.Close()
+	subscription := pubsubClient.Subscription(subscriptionID)
+	if subscription == nil {
+		return nil, fmt.Errorf("Uable to obtain subscription to delete %s", subscriptionID)
+	}
+
+	subscriptionErr := subscription.Delete(ctx)
+
+	if subscriptionErr != nil {
+		return nil, subscriptionErr
+	}
+
+	return subscription, nil
+}
