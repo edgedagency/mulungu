@@ -1,6 +1,7 @@
 package util
 
 import (
+	"encoding/base64"
 	"fmt"
 	"strings"
 
@@ -21,16 +22,24 @@ func PubSubTopicSplitID(topicID string) []string {
 }
 
 //PubSubTopicPublish sends data to topic
-func PubSubTopicPublish(ctx context.Context, topicID string, data map[string]string) error {
+func PubSubTopicPublish(ctx context.Context, topicID string, payload map[string]interface{}, attributes map[string]string) (id string, err error) {
 	topic, topicError := PubSubTopic(ctx, topicID)
 	if topicError != nil {
 		logger.Errorf(ctx, "pubsub util", "Failed to publish to topic: %s", topicID)
-		return topicError
+		return "", topicError
+	}
+	// NOTE:Concurrency settup
+	// topic.PublishSettings = pubsub.PublishSettings{
+	// 	NumGoroutines: 2,
+	// }
+	result := topic.Publish(ctx, &pubsub.Message{Data: []byte(base64.StdEncoding.EncodeToString([]byte(MapInterfaceToJSONString(payload)))), Attributes: attributes})
+	resultID, resultErr := result.Get(ctx)
+	if err != nil {
+		logger.Errorf(ctx, "pubsub util", "Failed to publish to topic: %s", resultErr.Error())
+		return "", err
 	}
 
-	topic.Publish(ctx, &pubsub.Message{Attributes: data})
-
-	return nil
+	return resultID, nil
 }
 
 //PubSubData obtain data item by key

@@ -59,3 +59,8 @@ func NumberizeString(subject interface{}) interface{} {
 	}
 	return subject
 }
+
+//StringTobyte converts string t byte
+func StringTobyte(subject string) []byte {
+	return []byte(subject)
+}

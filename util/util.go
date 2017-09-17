@@ -28,25 +28,6 @@ func InterfaceToByte(v interface{}) ([]byte, error) {
 	return b, nil
 }
 
-//MapToJSONString convert map to string to string
-func MapToJSONString(subject map[string]string) string {
-
-	bytes, err := json.Marshal(subject)
-	if err != nil {
-		return ""
-	}
-	return string(bytes)
-}
-
-//MapInterfaceToJSONString convert map to string to string
-func MapInterfaceToJSONString(subject map[string]interface{}) string {
-	bytes, err := json.Marshal(subject)
-	if err != nil {
-		return ""
-	}
-	return string(bytes)
-}
-
 func JSONInterface(subject interface{}) string {
 	bytes, err := json.Marshal(subject)
 	if err != nil {
@@ -136,20 +117,6 @@ func XMLMapStringInterface(r io.Reader) (map[string]interface{}, error) {
 	return nil, err
 }
 
-//MapToXML convert map to xml
-func MapToXML(subject map[string]interface{}) ([]byte, error) {
-	mjxMap, err := mxj.NewMapJson([]byte(MapInterfaceToJSONString(subject)))
-	if err != nil {
-		return nil, err
-	}
-	b, mjxXMLError := mjxMap.Xml()
-	if mjxXMLError != nil {
-		return nil, mjxXMLError
-	}
-
-	return b, nil
-}
-
 //JSONMapStringInterface converts io.Reader JSON content to map[string]interface
 func JSONMapStringInterface(r io.Reader) (map[string]interface{}, error) {
 	results := make(map[string]interface{})
@@ -202,11 +169,6 @@ func ComparePlainAndHashed(subject, subjectHashed []byte) (same bool, err error)
 		return false, err
 	}
 	return true, err
-}
-
-//StringTobyte converts string t byte
-func StringTobyte(subject string) []byte {
-	return []byte(subject)
 }
 
 //Search searchs a subject for element

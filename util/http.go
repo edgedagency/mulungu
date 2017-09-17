@@ -2,11 +2,13 @@ package util
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"google.golang.org/appengine/log"
 
+	"github.com/edgedagency/mulungu/constant"
 	"github.com/gorilla/mux"
 	"golang.org/x/net/context"
 )
@@ -68,4 +70,43 @@ func SetNamespace(ctx context.Context, r *http.Request) string {
 	}
 
 	return ""
+}
+
+//HTTPGetPath obtains path from request
+func HTTPGetPath(r *http.Request) string {
+	path := r.URL.Path
+	if r.URL.RawQuery != "" {
+		path = strings.Join([]string{path, r.URL.RawQuery}, "?")
+	}
+	return path
+}
+
+//HTTPCopyRequestHeader from original request
+func HTTPCopyRequestHeader(originalRequest *http.Request, candicateRequest *http.Request) *http.Request {
+	for key, headerValue := range originalRequest.Header {
+		for _, value := range headerValue {
+			candicateRequest.Header.Set(key, value)
+		}
+	}
+
+	return candicateRequest
+}
+
+//HTTPGetGoogleAppEngineServiceURL this returns an app spot host
+func HTTPGetGoogleAppEngineServiceURL(r *http.Request, service, defaultServiceHost, path string) string {
+	return fmt.Sprintf("%s://%s-dot-%s/%s", "https", service, HTTPGetServiceHost(r, defaultServiceHost), path)
+}
+
+//HTTPGetPathVariables returns map[string]string of path varaibles
+func HTTPGetPathVariables(r *http.Request) map[string]string {
+	return mux.Vars(r)
+}
+
+//HTTPGetServiceHost obtains servce host from request headers
+func HTTPGetServiceHost(r *http.Request, defaultServiceHost string) string {
+	serviceHost := r.Header.Get(constant.HeaderServiceHost)
+	if serviceHost == "" {
+		return defaultServiceHost
+	}
+	return serviceHost
 }
