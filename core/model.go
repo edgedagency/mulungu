@@ -31,6 +31,7 @@ type Model struct {
 	ModifiedDate time.Time       `json:"modifiedDate,omitempty" datastore:"modifiedDate,omitempty"`
 	CreatedBy    int64           `json:"createdBy,omitempty" datastore:"createdBy,omitempty"`
 	ModifiedBy   int64           `json:"modifiedBy,omitempty" datastore:"modifiedBy,omitempty"`
+	Scope        string          `json:"scope,omitempty" datastore:"scope,omitempty"`
 	Namespace    string          `json:"-" datastore:"-"`
 	Kind         string          `json:"-" datastore:"-"`
 	Context      context.Context `json:"-" datastore:"-"`
