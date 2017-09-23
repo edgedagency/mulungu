@@ -8,6 +8,7 @@ import (
 	"cloud.google.com/go/datastore"
 )
 
+//@NOTE: Below soon to be deprecated
 //IsDatastoreAcceptableType checks if type and type elements are acceptable to datastore
 func IsDatastoreAcceptableType(subject interface{}) bool {
 	kind := ReflectKind(subject)

@@ -168,3 +168,8 @@ func (c *Controller) ResponseBodyToBytes(r *http.Response) []byte {
 
 	return bytes
 }
+
+//Namespace returns namespace
+func (c *Controller) Namespace(ctx context.Context, r *http.Request) string {
+	return r.Header.Get(constant.HeaderNamespace)
+}

@@ -20,21 +20,21 @@ import (
 
 //Model element used to interact with datastore
 type Model struct {
-	Key          *datastore.Key  `json:"key,omitempty" datastore:"__key__,omitempty"`
-	ID           int64           `json:"id,omitempty" datastore:"-"`
-	TenantID     int64           `json:"tenantID,omitempty" datastore:"tenantID,omitempty"`
-	OwnerID      int64           `json:"ownerID,omitempty" datastore:"ownerID,omitempty"`
-	ParentID     int64           `json:"parentID,omitempty" datastore:"parentID,omitempty"`
-	Data         Dynamic         `json:"data,omitempty" datastore:"data,omitempty"`
-	Status       string          `json:"status,omitempty" datastore:"status,omitempty"`
-	CreatedDate  time.Time       `json:"createdDate,omitempty" datastore:"createdDate,omitempty"`
-	ModifiedDate time.Time       `json:"modifiedDate,omitempty" datastore:"modifiedDate,omitempty"`
-	CreatedBy    int64           `json:"createdBy,omitempty" datastore:"createdBy,omitempty"`
-	ModifiedBy   int64           `json:"modifiedBy,omitempty" datastore:"modifiedBy,omitempty"`
-	Scope        string          `json:"scope,omitempty" datastore:"scope,omitempty"`
-	Namespace    string          `json:"-" datastore:"-"`
-	Kind         string          `json:"-" datastore:"-"`
-	Context      context.Context `json:"-" datastore:"-"`
+	Key          *datastore.Key  `json:"key,omitempty" datastore:"__key__,omitempty" bigquery:"-"`
+	ID           int64           `json:"id,omitempty" datastore:"-" bigquery:"id"`
+	TenantID     int64           `json:"tenantID,omitempty" datastore:"tenantID,omitempty" bigquery:"tenantID"`
+	OwnerID      int64           `json:"ownerID,omitempty" datastore:"ownerID,omitempty" bigquery:"ownerID"`
+	ParentID     int64           `json:"parentID,omitempty" datastore:"parentID,omitempty" bigquery:"parentID"`
+	Data         Dynamic         `json:"data,omitempty" datastore:"data,omitempty" bigquery:"data"`
+	Status       string          `json:"status,omitempty" datastore:"status,omitempty" bigquery:"status"`
+	CreatedDate  time.Time       `json:"createdDate,omitempty" datastore:"createdDate,omitempty" bigquery:"createdDate"`
+	ModifiedDate time.Time       `json:"modifiedDate,omitempty" datastore:"modifiedDate,omitempty" bigquery:"modifiedDate"`
+	CreatedBy    int64           `json:"createdBy,omitempty" datastore:"createdBy,omitempty" bigquery:"createdBy"`
+	ModifiedBy   int64           `json:"modifiedBy,omitempty" datastore:"modifiedBy,omitempty" bigquery:"modifiedBy"`
+	Scope        string          `json:"scope,omitempty" datastore:"scope,omitempty" bigquery:"scope"`
+	Namespace    string          `json:"-" datastore:"-" bigquery:"-"`
+	Kind         string          `json:"-" datastore:"-" bigquery:"-"`
+	Context      context.Context `json:"-" datastore:"-" bigquery:"-"`
 	client       *datastore.Client
 }
 

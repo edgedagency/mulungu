@@ -1,17 +1,74 @@
 package util
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"strings"
 
 	"google.golang.org/appengine/log"
+	"google.golang.org/appengine/urlfetch"
 
 	"github.com/edgedagency/mulungu/constant"
+	"github.com/edgedagency/mulungu/logger"
 	"github.com/gorilla/mux"
 	"golang.org/x/net/context"
 )
+
+//FIXME: This appears to be a duplication of http.go
+
+//HTTPRequest processes a http request
+func HTTPRequest(ctx context.Context, request *http.Request) (*http.Response, error) {
+	httpClient := urlfetch.Client(ctx)
+
+	dumpedRequest, _ := httputil.DumpRequest(request, true)
+	logger.Debugf(ctx, "http util", "Request %s", string(dumpedRequest))
+
+	response, responseError := httpClient.Do(request)
+
+	if responseError != nil {
+		return nil, responseError
+	}
+
+	dumpedResponse, _ := httputil.DumpResponse(response, true)
+	logger.Debugf(ctx, "http util", "Response %s", string(dumpedResponse))
+
+	return response, nil
+}
+
+//HTTPNewRequest prepares a cloud function request
+func HTTPNewRequest(ctx context.Context, method, URL string, body []byte, searchParams map[string]string) (*http.Request, error) {
+
+	parsedURL, parseErr := url.Parse(URL)
+
+	if parseErr != nil {
+		logger.Errorf(ctx, "http util", "request url parsing failed %s", parseErr.Error())
+		return nil, parseErr
+	}
+
+	if searchParams != nil {
+		searchParamValues := parsedURL.Query()
+		for key, value := range searchParams {
+			searchParamValues.Set(key, value)
+		}
+		parsedURL.RawQuery = searchParamValues.Encode()
+	}
+
+	logger.Debugf(ctx, "http util", "original url:%s request url:%s", URL, parsedURL.String())
+
+	request, requestError := http.NewRequest(method, parsedURL.String(), bytes.NewReader(body))
+	request.Header.Set(constant.HeaderContentType, "application/json; charset=UTF-8")
+
+	if requestError != nil {
+		logger.Errorf(ctx, "datastore util", "request init error %s", requestError.Error())
+		return nil, requestError
+	}
+
+	return request, nil
+}
 
 //WriteJSON outputs json to response writer and sets up the right mimetype
 func WriteJSON(w http.ResponseWriter, data interface{}, statusCode int) {
