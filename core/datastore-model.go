@@ -7,34 +7,37 @@ import (
 	"google.golang.org/appengine"
 
 	"github.com/edgedagency/mulungu/constant"
+	"github.com/edgedagency/mulungu/logger"
 	"github.com/edgedagency/mulungu/util"
 	"golang.org/x/net/context"
 )
 
 //DatastoreQuery Datastore query
 type DatastoreQuery struct {
-	Filter []DatastoreFilter
+	Filters []*DatastoreFilter `json:"filters,omitempty"`
 }
 
 //AddFilter adds filter to query
-func (q *DatastoreQuery) AddFilter(datastoreFilter DatastoreFilter) {
-	q.Filter = append(q.Filter, datastoreFilter)
+func (q *DatastoreQuery) AddFilter(datastoreFilter *DatastoreFilter) *DatastoreQuery {
+	q.Filters = append(q.Filters, datastoreFilter)
+	return q
 }
 
 //DatastoreFilter filter object
 type DatastoreFilter struct {
-	Key       string `json:"key"`
-	Operation string `json:"operation"`
-	Value     string `json:"value"`
+	Key       string      `json:"key"`
+	Operation string      `json:"operation,omitempty"`
+	Value     interface{} `json:"value"`
 }
 
 //DatastoreModel struct representing a cloud function
 type DatastoreModel struct {
 	Namespace          string                 `json:"-"`
 	Kind               string                 `json:"-"`
-	Record             map[string]interface{} `json:"record"`
-	ExcludeFromIndexes []string               `json:"excludeFromIndexes"`
-	Query              *DatastoreQuery        `json:"query"`
+	Operation          string                 `json:"operation,omitempty"`
+	Record             map[string]interface{} `json:"record,omitempty"`
+	ExcludeFromIndexes []string               `json:"excludeFromIndexes,omitempty"`
+	Query              *DatastoreQuery        `json:"query,omitempty"`
 	Context            context.Context        `json:"-"`
 }
 
@@ -55,10 +58,14 @@ func (ds *DatastoreModel) JSONBytes() []byte {
 
 //Timestamp timestamps record
 func (ds *DatastoreModel) Timestamp() {
+	timestamp := time.Now()
+	//if no createdDate create it
 	if _, ok := ds.Record["createdDate"]; !ok {
-		ds.Record["createdDate"] = time.Now()
+		ds.Record["createdDate"] = timestamp
 	}
-	ds.Record["modifiedDate"] = time.Now()
+	ds.Record["modifiedDate"] = timestamp
+
+	logger.Debugf(ds.Context, "datastore model", "record timestamped %#v", ds.Record)
 }
 
 //Save timestamps record
@@ -96,8 +103,12 @@ func (ds *DatastoreModel) Delete(id string) (map[string]interface{}, error) {
 }
 
 //Get execute query on datastore
-func (ds *DatastoreModel) Get(searchParams map[string]string) (interface{}, error) {
-	response, responseErr := ds.execute(http.MethodGet, searchParams)
+func (ds *DatastoreModel) Get(searchParams map[string]string) ([]interface{}, error) {
+
+	//fixme:switch to query if we have query object
+	ds.Operation = "query"
+
+	response, responseErr := ds.execute(http.MethodPost, searchParams)
 	if responseErr != nil {
 		return nil, responseErr
 	}
@@ -107,7 +118,7 @@ func (ds *DatastoreModel) Get(searchParams map[string]string) (interface{}, erro
 		return nil, responseMapErr
 	}
 
-	return reponseMap["entities"], nil
+	return reponseMap["entities"].([]interface{}), nil
 }
 
 func (ds *DatastoreModel) execute(method string, searchParams map[string]string) (*http.Response, error) {
