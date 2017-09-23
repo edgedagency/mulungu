@@ -119,20 +119,7 @@ func XMLMapStringInterface(r io.Reader) (map[string]interface{}, error) {
 
 //JSONMapStringInterface converts io.Reader JSON content to map[string]interface
 func JSONMapStringInterface(r io.Reader) (map[string]interface{}, error) {
-	results := make(map[string]interface{})
-	decoder := json.NewDecoder(r)
-	decoder.UseNumber()
-	decodeErr := decoder.Decode(&results)
-
-	switch {
-	case decodeErr == io.EOF:
-		fmt.Println("request has no body, decoding skipped returning nil")
-		return nil, nil
-	case decodeErr != nil:
-		return nil, fmt.Errorf("Failed to decode reader, error %s", decodeErr.Error())
-	}
-
-	return results, nil
+	return ToMapStringInterface(r)
 }
 
 //ToMapStringInterface converts io.Reader to map[string]interface

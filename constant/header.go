@@ -4,6 +4,7 @@ package constant
 const (
 	HeaderProxyHost                 = "X-Proxy-Host"
 	HeaderNamespace                 = "X-Namespace"
+	HeaderKind                      = "X-Kind"
 	HeaderRequestAuthorizationToken = "X-Request-Authorization-Token"
 	HeaderAuthorization             = "Authorization"
 	HeaderContentType               = "Content-Type"

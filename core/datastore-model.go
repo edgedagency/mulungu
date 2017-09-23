@@ -6,6 +6,7 @@ import (
 
 	"google.golang.org/appengine"
 
+	"github.com/edgedagency/mulungu/constant"
 	"github.com/edgedagency/mulungu/util"
 	"golang.org/x/net/context"
 )
@@ -29,8 +30,8 @@ type DatastoreFilter struct {
 
 //DatastoreModel struct representing a cloud function
 type DatastoreModel struct {
-	Namespace          string                 `json:"namespace"`
-	Kind               string                 `json:"kind"`
+	Namespace          string                 `json:"-"`
+	Kind               string                 `json:"-"`
 	Record             map[string]interface{} `json:"record"`
 	ExcludeFromIndexes []string               `json:"excludeFromIndexes"`
 	Query              *DatastoreQuery        `json:"query"`
@@ -62,27 +63,63 @@ func (ds *DatastoreModel) Timestamp() {
 
 //Save timestamps record
 func (ds *DatastoreModel) Save() (map[string]interface{}, error) {
-	return ds.execute(http.MethodPost, nil)
+	ds.Timestamp()
+
+	response, responseErr := ds.execute(http.MethodPost, nil)
+	if responseErr != nil {
+		return nil, responseErr
+	}
+
+	return util.ResponseToMap(response)
 }
 
 //Update update model by id
 func (ds *DatastoreModel) Update(id string) (map[string]interface{}, error) {
-	return ds.execute(http.MethodPut, map[string]string{"id": id})
+	ds.Timestamp()
+
+	response, responseErr := ds.execute(http.MethodPut, map[string]string{"id": id})
+	if responseErr != nil {
+		return nil, responseErr
+	}
+
+	return util.ResponseToMap(response)
 }
 
 //Delete delete model by id
 func (ds *DatastoreModel) Delete(id string) (map[string]interface{}, error) {
-	return ds.execute(http.MethodDelete, map[string]string{"id": id})
+	response, responseErr := ds.execute(http.MethodDelete, map[string]string{"id": id})
+	if responseErr != nil {
+		return nil, responseErr
+	}
+
+	return util.ResponseToMap(response)
 }
 
 //Get execute query on datastore
-func (ds *DatastoreModel) Get(searchParams map[string]string) (map[string]interface{}, error) {
-	return ds.execute(http.MethodGet, searchParams)
+func (ds *DatastoreModel) Get(searchParams map[string]string) (interface{}, error) {
+	response, responseErr := ds.execute(http.MethodGet, searchParams)
+	if responseErr != nil {
+		return nil, responseErr
+	}
+
+	reponseMap, responseMapErr := util.ResponseToMap(response)
+	if responseMapErr != nil {
+		return nil, responseMapErr
+	}
+
+	return reponseMap["entities"], nil
 }
 
-func (ds *DatastoreModel) execute(method string, searchParams map[string]string) (map[string]interface{}, error) {
+func (ds *DatastoreModel) execute(method string, searchParams map[string]string) (*http.Response, error) {
+	request, requestErr := util.HTTPNewRequest(ds.Context,
+		method,
+		util.CloudFunctionGetPath("us-central1", appengine.AppID(ds.Context),
+			"dbdatastore"),
+		map[string]string{constant.HeaderNamespace: ds.Namespace,
+			constant.HeaderKind:        ds.Kind,
+			constant.HeaderContentType: "application/json; charset=UTF-8"},
+		ds.JSONBytes(), searchParams)
 
-	request, requestErr := util.HTTPNewRequest(ds.Context, method, util.CloudFunctionGetPath("us-central1", appengine.AppID(ds.Context), "dbdatastore"), ds.JSONBytes(), searchParams)
 	if requestErr != nil {
 		return nil, requestErr
 	}
@@ -92,5 +129,5 @@ func (ds *DatastoreModel) execute(method string, searchParams map[string]string)
 		return nil, responseErr
 	}
 
-	return util.ResponseToMap(response)
+	return response, nil
 }

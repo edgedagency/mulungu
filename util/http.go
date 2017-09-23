@@ -40,7 +40,7 @@ func HTTPRequest(ctx context.Context, request *http.Request) (*http.Response, er
 }
 
 //HTTPNewRequest prepares a cloud function request
-func HTTPNewRequest(ctx context.Context, method, URL string, body []byte, searchParams map[string]string) (*http.Request, error) {
+func HTTPNewRequest(ctx context.Context, method, URL string, headers map[string]string, body []byte, searchParams map[string]string) (*http.Request, error) {
 
 	parsedURL, parseErr := url.Parse(URL)
 
@@ -60,7 +60,13 @@ func HTTPNewRequest(ctx context.Context, method, URL string, body []byte, search
 	logger.Debugf(ctx, "http util", "original url:%s request url:%s", URL, parsedURL.String())
 
 	request, requestError := http.NewRequest(method, parsedURL.String(), bytes.NewReader(body))
-	request.Header.Set(constant.HeaderContentType, "application/json; charset=UTF-8")
+
+	if headers != nil {
+		for key, value := range headers {
+			logger.Debugf(ctx, "http util", "key %s value %s", key, value)
+			request.Header.Set(key, value)
+		}
+	}
 
 	if requestError != nil {
 		logger.Errorf(ctx, "datastore util", "request init error %s", requestError.Error())
