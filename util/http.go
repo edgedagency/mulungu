@@ -8,6 +8,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strings"
+	"time"
 
 	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/urlfetch"
@@ -22,10 +23,14 @@ import (
 
 //HTTPRequest processes a http request
 func HTTPRequest(ctx context.Context, request *http.Request) (*http.Response, error) {
-	httpClient := urlfetch.Client(ctx)
+
+	ctxWithDeadLine, ctxCancel := context.WithDeadline(ctx, time.Now().Add(30*time.Second))
+	defer ctxCancel()
+
+	httpClient := urlfetch.Client(ctxWithDeadLine)
 
 	dumpedRequest, _ := httputil.DumpRequest(request, true)
-	logger.Debugf(ctx, "http util", "Request %s", string(dumpedRequest))
+	logger.Debugf(ctxWithDeadLine, "http util", "Request %s", string(dumpedRequest))
 
 	response, responseError := httpClient.Do(request)
 
@@ -34,7 +39,7 @@ func HTTPRequest(ctx context.Context, request *http.Request) (*http.Response, er
 	}
 
 	dumpedResponse, _ := httputil.DumpResponse(response, true)
-	logger.Debugf(ctx, "http util", "Response %s", string(dumpedResponse))
+	logger.Debugf(ctxWithDeadLine, "http util", "Response %s", string(dumpedResponse))
 
 	return response, nil
 }

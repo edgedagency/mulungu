@@ -2,6 +2,7 @@ package core
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"google.golang.org/appengine"
@@ -17,10 +18,48 @@ type DatastoreQuery struct {
 	Filters []*DatastoreFilter `json:"filters,omitempty"`
 }
 
+//NewDatastoreQuery returns a pointer to a new datastore query
+func NewDatastoreQuery() *DatastoreQuery {
+	return &DatastoreQuery{}
+}
+
 //AddFilter adds filter to query
 func (q *DatastoreQuery) AddFilter(datastoreFilter *DatastoreFilter) *DatastoreQuery {
 	q.Filters = append(q.Filters, datastoreFilter)
 	return q
+}
+
+//BuildQuery builds query based on a custom query string, important to obtain query via URL
+func (q *DatastoreQuery) BuildQuery(ctx context.Context, filter string) *DatastoreQuery {
+
+	//Filter
+	filter = strings.TrimSpace(filter)
+	if filter != "" {
+		logger.Debugf(ctx, "datastore query", "query filter %s", filter)
+		filters := strings.Split(filter, ",")
+		logger.Debugf(ctx, "datastore query", "filters parts %#v", filters)
+		for _, filterPart := range filters {
+			logger.Debugf(ctx, "datastore query", "filterPart: %s", filterPart)
+			queryParts := strings.Split(filterPart, ":")
+			fieldAndOperation := q.ExtractOperation(queryParts[0])
+			logger.Debugf(ctx, "datastore query", "filterParts: filter: %s value:%s fieldAndOperaton:%#v", queryParts[0], queryParts[1], fieldAndOperation)
+			q.Filters = append(q.Filters, NewDatastoreFilter(fieldAndOperation[0], fieldAndOperation[1], util.NumberizeString(queryParts[1])))
+		}
+	}
+
+	//Order
+	//Sort
+	//Select
+
+	logger.Debugf(ctx, "datastore query", "filters: %#v", q.Filters)
+
+	return q
+}
+
+//ExtractOperation fid operation =<,>,<,= from subject
+func (q *DatastoreQuery) ExtractOperation(subject string) []string {
+	fieldName := strings.TrimRight(subject, " ><=!")
+	return []string{fieldName, strings.TrimSpace(subject[len(fieldName):])}
 }
 
 //DatastoreFilter filter object
@@ -28,6 +67,11 @@ type DatastoreFilter struct {
 	Key       string      `json:"key"`
 	Operation string      `json:"operation,omitempty"`
 	Value     interface{} `json:"value"`
+}
+
+//NewDatastoreFilter returns new datastore filter object
+func NewDatastoreFilter(key, operation string, value interface{}) *DatastoreFilter {
+	return &DatastoreFilter{Key: key, Operation: operation, Value: value}
 }
 
 //DatastoreModel struct representing a cloud function

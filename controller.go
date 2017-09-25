@@ -173,3 +173,8 @@ func (c *Controller) ResponseBodyToBytes(r *http.Response) []byte {
 func (c *Controller) Namespace(ctx context.Context, r *http.Request) string {
 	return r.Header.Get(constant.HeaderNamespace)
 }
+
+//Context returns request context
+func (c *Controller) Context(r *http.Request) context.Context {
+	return AppEngineServer.Context(r)
+}
