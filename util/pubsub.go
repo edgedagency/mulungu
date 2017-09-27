@@ -1,7 +1,6 @@
 package util
 
 import (
-	"encoding/base64"
 	"fmt"
 	"strings"
 
@@ -22,22 +21,38 @@ func PubSubTopicSplitID(topicID string) []string {
 }
 
 //PubSubTopicPublish sends data to topic
-func PubSubTopicPublish(ctx context.Context, topicID string, payload map[string]interface{}, attributes map[string]string) (id string, err error) {
+func PubSubTopicPublish(ctx context.Context, topicID string, payload map[string]interface{}, attributes map[string]string) (string, error) {
+	logger.Debugf(ctx, "pubsub util", "about to publish on topic:%s payload:%#v", topicID, payload)
+
 	topic, topicError := PubSubTopic(ctx, topicID)
 	if topicError != nil {
 		logger.Errorf(ctx, "pubsub util", "Failed to publish to topic: %s", topicID)
 		return "", topicError
 	}
+
+	defer topic.Stop()
 	// NOTE:Concurrency settup
 	// topic.PublishSettings = pubsub.PublishSettings{
 	// 	NumGoroutines: 2,
 	// }
-	result := topic.Publish(ctx, &pubsub.Message{Data: []byte(base64.StdEncoding.EncodeToString([]byte(MapInterfaceToJSONString(payload)))), Attributes: attributes})
-	resultID, resultErr := result.Get(ctx)
-	if err != nil {
-		logger.Errorf(ctx, "pubsub util", "Failed to publish to topic: %s", resultErr.Error())
-		return "", err
+
+	// var results []*pubsub.PublishResult
+	result := topic.Publish(ctx, &pubsub.Message{Data: []byte(MapInterfaceToJSONString(payload)), Attributes: attributes})
+	// results = append(results, result)
+	resultID, resultIDError := result.Get(ctx)
+	if resultIDError != nil {
+		logger.Errorf(ctx, "pubsub util", "failed to obtain result id %s", resultIDError.Error())
+		return "", resultIDError
 	}
+	// for _, r := range results {
+	// 	resultID, resultErr := r.Get(ctx)
+	// 	if resultErr != nil {
+	// 		logger.Errorf(ctx, "pubsub util", "result get error: %s", resultErr.Error())
+	// 	}
+	// 	logger.Debugf(ctx, "pubsub util", "results id: %s", resultID)
+	// }
+
+	//defer topic.Stop()
 
 	return resultID, nil
 }
@@ -69,7 +84,6 @@ func PubSubTopic(ctx context.Context, topicID string) (*pubsub.Topic, error) {
 		logger.Errorf(ctx, "pubsub util", "Failed to create client: %v", pubsubClientErr)
 		return nil, pubsubClientErr
 	}
-	defer pubsubClient.Close()
 
 	topic := pubsubClient.Topic(topicID)
 

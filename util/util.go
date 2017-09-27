@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
@@ -49,9 +50,12 @@ func JSONStringToMap(subject string) map[string]string {
 // JSONDecode converts bytes to map[string]interface{} specified
 func JSONDecode(b []byte) (map[string]interface{}, error) {
 	results := make(map[string]interface{})
-	err := json.Unmarshal(b, &results)
+	decoder := json.NewDecoder(bytes.NewReader(b))
+	decoder.UseNumber()
+	decodeErr := decoder.Decode(&results)
+	//err := json.Unmarshal(b, &results)
 
-	if err != nil {
+	if decodeErr != nil {
 		return nil, errors.New("Failed to decode data")
 	}
 
