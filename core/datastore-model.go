@@ -16,6 +16,8 @@ import (
 //DatastoreQuery Datastore query
 type DatastoreQuery struct {
 	Filters []*DatastoreFilter `json:"filters,omitempty"`
+	Selects []DatastoreSelect  `json:"selects,omitempty"`
+	Limit   int                `json:"limit,omitempty"`
 }
 
 //NewDatastoreQuery returns a pointer to a new datastore query
@@ -26,6 +28,22 @@ func NewDatastoreQuery() *DatastoreQuery {
 //AddFilter adds filter to query
 func (q *DatastoreQuery) AddFilter(datastoreFilter *DatastoreFilter) *DatastoreQuery {
 	q.Filters = append(q.Filters, datastoreFilter)
+	return q
+}
+
+//AddSelect adds select to query
+func (q *DatastoreQuery) AddSelect(datastoreSelect DatastoreSelect) *DatastoreQuery {
+	//FIXME: if has __key__ reject
+	q.Selects = append(q.Selects, datastoreSelect)
+	return q
+}
+
+//KeysOnly builds query based on a custom query string, important to obtain query via URL
+func (q *DatastoreQuery) KeysOnly() *DatastoreQuery {
+	//Remove all other selects
+	q.Selects = []DatastoreSelect{}
+	q.AddSelect(DatastoreSelect("__key__"))
+
 	return q
 }
 
@@ -61,6 +79,9 @@ func (q *DatastoreQuery) ExtractOperation(subject string) []string {
 	fieldName := strings.TrimRight(subject, " ><=!")
 	return []string{fieldName, strings.TrimSpace(subject[len(fieldName):])}
 }
+
+//DatastoreSelect datastore select
+type DatastoreSelect string
 
 //DatastoreFilter filter object
 type DatastoreFilter struct {

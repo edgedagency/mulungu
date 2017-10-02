@@ -29,32 +29,61 @@ func PubSubTopicPublish(ctx context.Context, topicID string, payload map[string]
 		logger.Errorf(ctx, "pubsub util", "Failed to publish to topic: %s", topicID)
 		return "", topicError
 	}
-
 	defer topic.Stop()
-	// NOTE:Concurrency settup
 	// topic.PublishSettings = pubsub.PublishSettings{
 	// 	NumGoroutines: 2,
 	// }
-
-	// var results []*pubsub.PublishResult
 	result := topic.Publish(ctx, &pubsub.Message{Data: []byte(MapInterfaceToJSONString(payload)), Attributes: attributes})
-	// results = append(results, result)
 	resultID, resultIDError := result.Get(ctx)
 	if resultIDError != nil {
 		logger.Errorf(ctx, "pubsub util", "failed to obtain result id %s", resultIDError.Error())
 		return "", resultIDError
 	}
-	// for _, r := range results {
-	// 	resultID, resultErr := r.Get(ctx)
-	// 	if resultErr != nil {
-	// 		logger.Errorf(ctx, "pubsub util", "result get error: %s", resultErr.Error())
-	// 	}
-	// 	logger.Debugf(ctx, "pubsub util", "results id: %s", resultID)
-	// }
-
-	//defer topic.Stop()
-
 	return resultID, nil
+}
+
+//PubSubTopicData returns topic data as map[string]interface{} decoded JSON data
+func PubSubTopicData(ctx context.Context, data map[string]interface{}) map[string]interface{} {
+	if dataElement, ok := data["message"]; ok {
+		if val, ok := dataElement.(map[string]interface{})["data"]; ok {
+			decoded, decodedError := StringDecode(val.(string))
+			if decodedError != nil {
+				logger.Debugf(ctx, "pubsub util", "failed to decode data %s", decodedError.Error())
+				return nil
+			}
+
+			decodedMap, decodedMapError := JSONDecode(decoded)
+			if decodedMapError != nil {
+				logger.Debugf(ctx, "pubsub utile", "failed to json decode data %s", decodedMapError.Error())
+				return nil
+			}
+			return decodedMap
+		}
+	}
+	return nil
+}
+
+//PubSubTopicAttributes returns topic data as map[string]interface{} decoded JSON data
+func PubSubTopicAttributes(ctx context.Context, data map[string]interface{}) map[string]interface{} {
+	if dataElement, ok := data["message"]; ok {
+		if val, ok := dataElement.(map[string]interface{})["attributes"]; ok {
+			return val.(map[string]interface{})
+		}
+	}
+	return nil
+}
+
+//PubSubTopicSubscription returns topic subscription information namespace and topic
+func PubSubTopicSubscription(ctx context.Context, data map[string]interface{}) []string {
+
+	if dataElement, ok := data["subscription"]; ok {
+		subscription := dataElement.(string)
+		subscription = subscription[(strings.LastIndex(subscription, "/") + 1):]
+		logger.Debugf(ctx, "pubsub util", "subscription %s", subscription)
+		return strings.Split(subscription, "-")
+	}
+
+	return nil
 }
 
 //PubSubData obtain data item by key

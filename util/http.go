@@ -81,6 +81,16 @@ func HTTPNewRequest(ctx context.Context, method, URL string, headers map[string]
 	return request, nil
 }
 
+//HTTPPost executes http post using url fetch
+func HTTPPost(ctx context.Context, URL string, headers map[string]string, body []byte, searchParams map[string]string) (*http.Response, error) {
+	request, requestError := HTTPNewRequest(ctx, http.MethodPost, URL, headers, body, searchParams)
+	if requestError != nil {
+		logger.Errorf(ctx, "http util", "request init error %s", requestError.Error())
+		return nil, requestError
+	}
+	return HTTPRequest(ctx, request)
+}
+
 //WriteJSON outputs json to response writer and sets up the right mimetype
 func WriteJSON(w http.ResponseWriter, data interface{}, statusCode int) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")

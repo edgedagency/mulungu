@@ -17,6 +17,14 @@ func MapToJSONString(subject map[string]string) string {
 	return string(bytes)
 }
 
+func MapInterfaceToJSONBytes(subject map[string]interface{}) []byte {
+	bytes, err := json.Marshal(subject)
+	if err != nil {
+		return nil
+	}
+	return bytes
+}
+
 //MapInterfaceToJSONString convert map to string to string
 func MapInterfaceToJSONString(subject map[string]interface{}) string {
 	bytes, err := json.Marshal(subject)

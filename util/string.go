@@ -1,12 +1,22 @@
 package util
 
 import (
+	"encoding/base64"
 	"reflect"
 	"strconv"
 	"strings"
 
 	"github.com/asaskevich/govalidator"
 )
+
+//StringDecode decodes base64 encoded string content
+func StringDecode(encodedString string) ([]byte, error) {
+	decoded, decodedError := base64.StdEncoding.DecodeString(encodedString)
+	if decodedError != nil {
+		return nil, decodedError
+	}
+	return decoded, nil
+}
 
 //StringContains checks if a string contains any of the pradicates send
 func StringContains(subject string, pradicates []string) bool {
@@ -42,6 +52,8 @@ func ToString(subject interface{}) string {
 	switch ReflectKind(subject) {
 	case reflect.String:
 		return subject.(string)
+	case reflect.Int:
+		return strconv.Itoa(subject.(int))
 	case reflect.Int64:
 		return strconv.FormatInt(subject.(int64), 10)
 	case reflect.Float64:
