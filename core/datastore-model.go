@@ -25,6 +25,13 @@ func NewDatastoreQuery() *DatastoreQuery {
 	return &DatastoreQuery{}
 }
 
+//SetLimit set limits of items to return
+func (q *DatastoreQuery) SetLimit(limit int) *DatastoreQuery {
+	//fire error limit already set if called twice
+	q.Limit = limit
+	return q
+}
+
 //AddFilter adds filter to query
 func (q *DatastoreQuery) AddFilter(datastoreFilter *DatastoreFilter) *DatastoreQuery {
 	q.Filters = append(q.Filters, datastoreFilter)
@@ -172,12 +179,10 @@ func (ds *DatastoreModel) Get(searchParams map[string]string) ([]interface{}, er
 
 	//fixme:switch to query if we have query object
 	ds.Operation = "query"
-
 	response, responseErr := ds.execute(http.MethodPost, searchParams)
 	if responseErr != nil {
 		return nil, responseErr
 	}
-
 	reponseMap, responseMapErr := util.ResponseToMap(response)
 	if responseMapErr != nil {
 		return nil, responseMapErr
@@ -190,7 +195,7 @@ func (ds *DatastoreModel) execute(method string, searchParams map[string]string)
 	request, requestErr := util.HTTPNewRequest(ds.Context,
 		method,
 		util.CloudFunctionGetPath("us-central1", appengine.AppID(ds.Context),
-			"dbdatastore"),
+			"datastore"),
 		map[string]string{constant.HeaderNamespace: ds.Namespace,
 			constant.HeaderKind:        ds.Kind,
 			constant.HeaderContentType: "application/json; charset=UTF-8"},

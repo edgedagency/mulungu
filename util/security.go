@@ -6,6 +6,7 @@ import (
 
 	"github.com/edgedagency/mulungu/constant"
 	"github.com/edgedagency/mulungu/logger"
+	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 )
 
@@ -41,4 +42,30 @@ func HasAnyRole(ctx context.Context, roles []string, r *http.Request) bool {
 	}
 
 	return false
+}
+
+//EncryptPassword encrypts a password
+func EncryptPassword(subject string) ([]byte, error) {
+
+	if IsEncryptedPassword(subject) == false {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(subject), bcrypt.DefaultCost)
+		if err != nil {
+			return nil, err
+		}
+		return hashedPassword, nil
+	}
+
+	//this password is already encrypted, skip encryption
+	return []byte(subject), nil
+}
+
+//IsEncryptedPassword determins if password is sncrypted by calculating its cost
+func IsEncryptedPassword(subject string) bool {
+	//is this password encrypted? determine by calculating encryption cost
+	encryptionCost, _ := bcrypt.Cost([]byte(subject))
+	if encryptionCost == 0 {
+		return false
+	}
+
+	return true
 }

@@ -3,6 +3,7 @@ package mulungu
 import (
 	"bytes"
 	"strings"
+	"time"
 
 	"golang.org/x/net/context"
 
@@ -45,6 +46,8 @@ func GenerateGoogleServiceHost(host, service string) string {
 func NewHTTPRequest(ctx context.Context, schema, host, username, password string, secured bool, headers map[string]string) *HTTPRequest {
 
 	logger.Debugf(ctx, "http request", "creating new request schema:%s host:%s headers:%v", schema, host, headers)
+	ctxWithDeadLine, ctxCancel := context.WithDeadline(ctx, time.Now().Add(30*time.Second))
+	defer ctxCancel()
 
 	return &HTTPRequest{context: ctx,
 		host:       schema + "://" + host,
@@ -52,7 +55,7 @@ func NewHTTPRequest(ctx context.Context, schema, host, username, password string
 		password:   password,
 		headers:    headers,
 		secured:    secured,
-		httpClient: urlfetch.Client(ctx)}
+		httpClient: urlfetch.Client(ctxWithDeadLine)}
 }
 
 // SendJSON construct a json request body for this request and sends to configured http endpoint

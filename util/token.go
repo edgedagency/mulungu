@@ -71,3 +71,51 @@ func Claim(key string, r *http.Request) (interface{}, error) {
 
 	return nil, fmt.Errorf("can't find claim %s", key)
 }
+
+//GenerateJWTToken generates and returns a signed JWTToken string use with header Authorization Bearer generatedTokenString
+func GenerateJWTToken(signingMethod jwt.SigningMethod, claims jwt.Claims, signingKey string) string {
+	if signingMethod == nil {
+		signingMethod = jwt.SigningMethodHS256
+	}
+
+	JWTToken := jwt.NewWithClaims(signingMethod, claims)
+	signedJWTToken, signingError := JWTToken.SignedString([]byte(signingKey))
+
+	if signingError != nil {
+		//log.Error("failed to sign JWTToken with provided signing key")
+		return ""
+	}
+
+	return signedJWTToken
+}
+
+// Audience  string `json:"aud,omitempty"`
+// ExpiresAt int64  `json:"exp,omitempty"`
+// Id        string `json:"jti,omitempty"`
+// IssuedAt  int64  `json:"iat,omitempty"`
+// Issuer    string `json:"iss,omitempty"`
+// NotBefore int64  `json:"nbf,omitempty"`
+// Subject   string `json:"sub,omitempty"`
+
+//Claims structure for customized claims
+// type Claims struct {
+// 	Roles    []string
+// 	TenantID int64
+// 	UserID   int64
+// 	jwt.StandardClaims
+// }
+//
+// //NewClaim generates a new security claim
+// func NewClaim(roles []string, tenantID int64, UserID int64, jti string, aud string, exp int64, iss string, sub string) Claims {
+// 	claims := Claims{roles, tenantID, UserID,
+// 		jwt.StandardClaims{
+// 			Id:        jti,
+// 			Audience:  aud,
+// 			ExpiresAt: exp,
+// 			IssuedAt:  time.Now().Unix(),
+// 			NotBefore: time.Now().Unix(),
+// 			Issuer:    iss,
+// 			Subject:   sub}}
+//
+// 	return claims
+// }
