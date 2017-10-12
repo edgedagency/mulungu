@@ -134,6 +134,11 @@ func (c *Controller) Created(ctx context.Context, w http.ResponseWriter, r *http
 	c.Write(ctx, w, r, http.StatusCreated, NewResponse().Add("message", "Record/s created").Add("data", data).Format(r.Header.Get(constant.HeaderContentType)))
 }
 
+//Custom generates a quick custom response with possible data
+func (c *Controller) Custom(ctx context.Context, w http.ResponseWriter, r *http.Request, status int, message string, data interface{}) {
+	c.Write(ctx, w, r, status, NewResponse().Add("message", message).Add("data", data).Format(r.Header.Get(constant.HeaderContentType)))
+}
+
 //Found generates a found response with data
 func (c *Controller) Found(ctx context.Context, w http.ResponseWriter, r *http.Request, data interface{}) {
 	c.Write(ctx, w, r, http.StatusOK, NewResponse().Add("message", "Record/s retrived").Add("data", data).Format(r.Header.Get(constant.HeaderContentType)))

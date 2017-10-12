@@ -30,24 +30,34 @@ func StringContains(subject string, pradicates []string) bool {
 
 //StringToInt converts a string to an integer
 func StringToInt(subject string) int {
-	i, err := strconv.Atoi(subject)
-	if err != nil {
-		return 0
+	if subject != "" {
+		i, err := strconv.Atoi(subject)
+		if err != nil {
+			return 0
+		}
+		return i
 	}
-	return i
+	return 0
 }
 
 //StringToInt64 converts a string to an integer
 func StringToInt64(subject string) int64 {
-	i, err := strconv.ParseInt(subject, 10, 64)
-	if err != nil {
-		return 0
+	if subject != "" {
+		i, err := strconv.ParseInt(subject, 10, 64)
+		if err != nil {
+			return 0
+		}
+		return i
 	}
-	return i
+	return 0
 }
 
 //ToString Converts interface to a string
 func ToString(subject interface{}) string {
+
+	if subject == nil {
+		return ""
+	}
 
 	switch ReflectKind(subject) {
 	case reflect.String:

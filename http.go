@@ -46,8 +46,7 @@ func GenerateGoogleServiceHost(host, service string) string {
 func NewHTTPRequest(ctx context.Context, schema, host, username, password string, secured bool, headers map[string]string) *HTTPRequest {
 
 	logger.Debugf(ctx, "http request", "creating new request schema:%s host:%s headers:%v", schema, host, headers)
-	ctxWithDeadLine, ctxCancel := context.WithDeadline(ctx, time.Now().Add(30*time.Second))
-	defer ctxCancel()
+	ctxWithDeadLine, _ := context.WithDeadline(ctx, time.Now().Add(30*time.Second))
 
 	return &HTTPRequest{context: ctx,
 		host:       schema + "://" + host,
