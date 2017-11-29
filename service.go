@@ -38,20 +38,14 @@ func (s *Service) Context() context.Context {
 }
 
 //Find returns application based on id
-func (s *Service) Find(id string) (interface{}, error) {
+func (s *Service) Find(id string) (map[string]interface{}, error) {
 
 	//2. save record
-	datastoreModel := core.NewDatastoreModel(s.Context(), s.Namespace(), s.Kind(), nil, nil)
-	datastoreModel.Query = (&core.DatastoreQuery{}).AddFilter(&core.DatastoreFilter{Key: "__key__", Operation: "=", Value: id})
-	responseRecord, responseError := datastoreModel.Get(nil)
+	datastoreModel := core.NewDatastoreModel(s.Context(), s.Namespace(), s.Kind(), nil)
+	responseRecord, responseError := datastoreModel.Find(id)
 
 	if responseError != nil {
 		return nil, responseError
-	}
-
-	//return first item
-	if len(responseRecord) > 0 {
-		return responseRecord[0], nil
 	}
 
 	return responseRecord, nil
@@ -59,9 +53,9 @@ func (s *Service) Find(id string) (interface{}, error) {
 
 //FindAll finds all application from datastore
 func (s *Service) FindAll(filter string) (interface{}, error) {
-	datastoreModel := core.NewDatastoreModel(s.Context(), s.Namespace(), s.Kind(), nil, nil)
-	datastoreModel.Query = core.NewDatastoreQuery().BuildQuery(s.Context(), filter)
-	responseRecord, responseError := datastoreModel.Get(nil)
+
+	datastoreModel := core.NewDatastoreModel(s.Context(), s.Namespace(), s.Kind(), nil)
+	responseRecord, responseError := datastoreModel.FindAll(filter, "", "", 0, 0, nil)
 
 	if responseError != nil {
 		return nil, responseError

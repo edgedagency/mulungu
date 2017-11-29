@@ -81,6 +81,16 @@ func HTTPNewRequest(ctx context.Context, method, URL string, headers map[string]
 	return request, nil
 }
 
+//HTTPExecute short cut to execute http request
+func HTTPExecute(ctx context.Context, method, URL string, headers map[string]string, body []byte, searchParams map[string]string) (*http.Response, error) {
+	request, requestError := HTTPNewRequest(ctx, method, URL, headers, body, searchParams)
+	if requestError != nil {
+		logger.Errorf(ctx, "http util", "request init error %s", requestError.Error())
+		return nil, requestError
+	}
+	return HTTPRequest(ctx, request)
+}
+
 //HTTPPost executes http post using url fetch
 func HTTPPost(ctx context.Context, URL string, headers map[string]string, body []byte, searchParams map[string]string) (*http.Response, error) {
 	request, requestError := HTTPNewRequest(ctx, http.MethodPost, URL, headers, body, searchParams)
@@ -148,6 +158,30 @@ func SetNamespace(ctx context.Context, r *http.Request) string {
 	}
 
 	return ""
+}
+
+//HTTPRequestURL returns a url based on provided attributes path and search params
+func HTTPRequestURL(ctx context.Context, baseURL string, pathParams []string, searchParams map[string]string) string {
+
+	if pathParams != nil {
+		baseURL = strings.Join([]string{baseURL, strings.Join(pathParams, "/")}, "/")
+	}
+
+	parsedURL, parseErr := url.Parse(baseURL)
+	if parseErr != nil {
+		logger.Errorf(ctx, "http util", "request url parsing failed %s", parseErr.Error())
+		panic(fmt.Errorf("request url parsing failed %s", parseErr.Error()))
+	}
+
+	if searchParams != nil {
+		searchParamValues := parsedURL.Query()
+		for key, value := range searchParams {
+			searchParamValues.Set(key, value)
+		}
+		parsedURL.RawQuery = searchParamValues.Encode()
+	}
+
+	return parsedURL.String()
 }
 
 //HTTPGetPath obtains path from request

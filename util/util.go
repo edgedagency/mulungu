@@ -66,34 +66,36 @@ func JSONDecode(b []byte) (map[string]interface{}, error) {
 func ResponseToMap(r *http.Response) (map[string]interface{}, error) {
 	defer r.Body.Close()
 
-	switch strings.ToLower(r.Header.Get(constant.HeaderContentType)) {
-	case "application/xml":
-	case "application/xml; charset=utf-8":
+	contentType := strings.TrimSpace(strings.ToLower(r.Header.Get(constant.HeaderContentType)))
+
+	switch contentType {
+	case "application/xml", "application/xml; charset=utf-8":
 		return XMLMapStringInterface(r.Body)
-	case "application/json":
-	case "application/json; charset=utf-8":
+	case "application/json", "application/json; charset=utf-8":
 		return JSONMapStringInterface(r.Body)
 	}
 
-	return nil, fmt.Errorf("Response Error: Failed to decode accepted content types [%s,%s] found (%s)",
-		"application/xml", "application/json", strings.ToLower(r.Header.Get(constant.HeaderContentType)))
+	return nil, fmt.Errorf("Response Error: Failed to decode accepted content types [%s,%s,%s,%s] found (%s)",
+		"application/xml", "application/xml; charset=utf-8", "application/json", "application/json; charset=utf-8",
+		contentType)
 }
 
 //RquestToMap  Unmarshal http.Request.Body to map[string]interface{}
 func RquestToMap(r *http.Request) (map[string]interface{}, error) {
 	defer r.Body.Close()
 
-	switch strings.ToLower(r.Header.Get(constant.HeaderContentType)) {
-	case "application/xml":
-	case "application/xml; charset=utf-8":
+	contentType := strings.TrimSpace(strings.ToLower(r.Header.Get(constant.HeaderContentType)))
+
+	switch contentType {
+	case "application/xml", "application/xml; charset=utf-8":
 		return XMLMapStringInterface(r.Body)
-	case "application/json":
-	case "application/json; charset=utf-8":
+	case "application/json", "application/json; charset=utf-8":
 		return JSONMapStringInterface(r.Body)
 	}
 
-	return nil, fmt.Errorf("Rquest Error: Failed to decode accepted content types [%s,%s] found (%s)",
-		"application/xml", "application/json", strings.ToLower(r.Header.Get(constant.HeaderContentType)))
+	return nil, fmt.Errorf("Response Error: Failed to decode accepted content types [%s,%s,%s,%s] found (%s)",
+		"application/xml", "application/xml; charset=utf-8", "application/json", "application/json; charset=utf-8",
+		contentType)
 }
 
 // JSONDecodeHTTPRequest Unmarshal http.Request.Body to interface
@@ -129,6 +131,26 @@ func JSONMapStringInterface(r io.Reader) (map[string]interface{}, error) {
 //ToMapStringInterface converts io.Reader to map[string]interface
 func ToMapStringInterface(r io.Reader) (map[string]interface{}, error) {
 	results := make(map[string]interface{})
+	decoder := json.NewDecoder(r)
+	decoder.UseNumber()
+	decodeErr := decoder.Decode(&results)
+
+	switch {
+	case decodeErr == io.EOF:
+		fmt.Println("request has no body, decoding skipped returning nil")
+		return nil, nil
+	case decodeErr != nil:
+		return nil, fmt.Errorf("Failed to decode reader, error %s", decodeErr.Error())
+	}
+
+	return results, nil
+}
+
+//ToInterfaceSlice converts io.Reader to []interface{}
+func ToInterfaceSlice(r io.Reader) ([]interface{}, error) {
+
+	var results []interface{}
+
 	decoder := json.NewDecoder(r)
 	decoder.UseNumber()
 	decodeErr := decoder.Decode(&results)
