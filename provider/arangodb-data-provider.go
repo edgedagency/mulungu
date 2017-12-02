@@ -103,7 +103,7 @@ func (dp *ArangodbDataProvider) Find(collectionName string, id string) (map[stri
 //FindAll search for and obtain records
 func (dp *ArangodbDataProvider) FindAll(collectionName string, filter string, sort string, order string, limit int, page int, selects []string) ([]interface{}, error) {
 
-	response, responseError := dp.execute(collectionName, http.MethodGet, nil, map[string]string{filter: filter}, nil)
+	response, responseError := dp.execute(collectionName, http.MethodGet, nil, map[string]string{"filter": filter}, nil)
 
 	if responseError != nil {
 		logger.Errorf(dp.Context, "Arangodb Data Provider", "execution error %s", responseError.Error())
