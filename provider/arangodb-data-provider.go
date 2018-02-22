@@ -112,6 +112,7 @@ func (dp *ArangodbDataProvider) FindAll(collectionName string, filter string, so
 
 	reponseMap, responseMapErr := util.ToInterfaceSlice(response.Body)
 	if responseMapErr != nil {
+		logger.Errorf(dp.Context, "Arangodb Data Provider", "failed to process reponse body %s", responseMapErr.Error())
 		return nil, responseMapErr
 	}
 
@@ -125,6 +126,8 @@ func (dp *ArangodbDataProvider) addQueryParam(queryParams map[string]string, key
 }
 
 func (dp *ArangodbDataProvider) execute(collectionName, method string, data []byte, searchParams map[string]string, pathParams []string) (*http.Response, error) {
+
+	logger.Debugf(dp.Context, "Arangodb Data Provider", "executing request searchParams: %#v pathParams: %#v", searchParams, pathParams)
 
 	//FIXME: util needed to construct a path
 	return util.HTTPExecute(dp.Context, method, util.HTTPRequestURL(dp.Context,

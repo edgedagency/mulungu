@@ -44,6 +44,14 @@ func ReflectIsKindJSONNumber(subject interface{}) bool {
 	return false
 }
 
+//IsInt returns true if interface passed is an array
+func IsInt(subject interface{}) bool {
+	if ReflectKind(subject) == reflect.Int {
+		return true
+	}
+	return false
+}
+
 //IsString returns true if interface passed is an array
 func IsString(subject interface{}) bool {
 	if ReflectKind(subject) == reflect.String {

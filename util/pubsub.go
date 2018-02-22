@@ -44,6 +44,8 @@ func PubSubTopicPublish(ctx context.Context, topicID string, payload map[string]
 
 //PubSubTopicData returns topic data as map[string]interface{} decoded JSON data
 func PubSubTopicData(ctx context.Context, data map[string]interface{}) map[string]interface{} {
+	logger.Debugf(ctx, "pubsub util", "attempting to obtain topic data %#v", data)
+
 	if dataElement, ok := data["message"]; ok {
 		if val, ok := dataElement.(map[string]interface{})["data"]; ok {
 			decoded, decodedError := StringDecode(val.(string))
@@ -54,7 +56,7 @@ func PubSubTopicData(ctx context.Context, data map[string]interface{}) map[strin
 
 			decodedMap, decodedMapError := JSONDecode(decoded)
 			if decodedMapError != nil {
-				logger.Debugf(ctx, "pubsub utile", "failed to json decode data %s", decodedMapError.Error())
+				logger.Debugf(ctx, "pubsub util", "failed to json decode data %s", decodedMapError.Error())
 				return nil
 			}
 			return decodedMap

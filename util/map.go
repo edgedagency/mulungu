@@ -25,6 +25,15 @@ func MapInterfaceToJSONBytes(subject map[string]interface{}) []byte {
 	return bytes
 }
 
+//MapInterfaceToMapString converts map[string]interface{} to map[string]string
+func MapInterfaceToMapString(subject map[string]interface{}) map[string]string {
+	mapped := make(map[string]string)
+	for key, value := range subject {
+		mapped[key] = value.(string)
+	}
+	return mapped
+}
+
 //MapInterfaceToJSONString convert map to string to string
 func MapInterfaceToJSONString(subject map[string]interface{}) string {
 	bytes, err := json.Marshal(subject)

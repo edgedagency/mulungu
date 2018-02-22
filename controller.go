@@ -154,6 +154,11 @@ func (c *Controller) NotFound(ctx context.Context, w http.ResponseWriter, r *htt
 	c.Write(ctx, w, r, http.StatusNotFound, NewResponse().Add("message", "Record/s not found").Format(r.Header.Get(constant.HeaderContentType)))
 }
 
+//AthenticationFailed generates a not found http response
+func (c *Controller) AthenticationFailed(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	c.Write(ctx, w, r, http.StatusForbidden, NewResponse().Add("message", "Failed to athenticate").Format(r.Header.Get(constant.HeaderContentType)))
+}
+
 //Error generates a error response
 func (c *Controller) Error(ctx context.Context, w http.ResponseWriter, r *http.Request, message string, err error) {
 	c.Write(ctx, w, r, http.StatusInternalServerError, NewResponse().Add("message", message).Add("error", err.Error()).Format(r.Header.Get(constant.HeaderContentType)))
@@ -165,12 +170,13 @@ func (c *Controller) OK(ctx context.Context, w http.ResponseWriter, r *http.Requ
 }
 
 //ResponseBodyToBytes obtains response body as bytes or empty
-func (c *Controller) ResponseBodyToBytes(r *http.Response) []byte {
+func (c *Controller) ResponseBodyToBytes(ctx context.Context, r *http.Response) []byte {
 	bytes, err := ioutil.ReadAll(r.Body)
+
 	if err != nil {
 		return []byte{}
 	}
-
+	logger.Debugf(ctx, " controller", "body %s", string(bytes))
 	return bytes
 }
 

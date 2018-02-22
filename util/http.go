@@ -21,6 +21,30 @@ import (
 
 //FIXME: This appears to be a duplication of http.go
 
+//HTTPInternalRequest executes internal request
+func HTTPInternalRequest(ctx context.Context, namespace, service, method string, data map[string]interface{}, tag string) (map[string]interface{}, error) {
+	//FIXME: util needed to construct a path
+	httpResponse, httpError := HTTPExecute(ctx, method, HTTPRequestURL(ctx,
+		strings.Join([]string{"https://user-dot-ibudo-console.appspot.com/api/v1", service}, "/"),
+		nil, nil), map[string]string{constant.HeaderNamespace: namespace,
+		constant.HeaderContentType: "application/json; charset=utf-8"},
+		MapInterfaceToJSONBytes(data),
+		nil)
+
+	if httpError != nil {
+		logger.Errorf(ctx, "util "+tag, "failed to execute internal request, error %s", httpError.Error())
+		return nil, httpError
+	}
+
+	responseMap, responseMapError := ResponseToMap(httpResponse)
+	if responseMapError != nil {
+		logger.Errorf(ctx, "util "+tag, "record conversation to map failed %s", responseMapError.Error())
+		return nil, responseMapError
+	}
+
+	return responseMap, nil
+}
+
 //HTTPRequest processes a http request
 func HTTPRequest(ctx context.Context, request *http.Request) (*http.Response, error) {
 

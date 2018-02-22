@@ -37,7 +37,7 @@ func (s *Service) Context() context.Context {
 	return s.context
 }
 
-//Find returns application based on id
+//Find returns service based on id
 func (s *Service) Find(id string) (map[string]interface{}, error) {
 
 	//2. save record
@@ -51,8 +51,10 @@ func (s *Service) Find(id string) (map[string]interface{}, error) {
 	return responseRecord, nil
 }
 
-//FindAll finds all application from datastore
+//FindAll finds all service from datastore
 func (s *Service) FindAll(filter string) (interface{}, error) {
+
+	logger.Debugf(s.Context(), "service service", "finding all %s", filter)
 
 	datastoreModel := core.NewDatastoreModel(s.Context(), s.Namespace(), s.Kind(), nil)
 	responseRecord, responseError := datastoreModel.FindAll(filter, "", "", 0, 0, nil)
@@ -65,10 +67,12 @@ func (s *Service) FindAll(filter string) (interface{}, error) {
 }
 
 //Publish publish to topic
-func (s *Service) Publish(topic string, record map[string]interface{}, attributes map[string]string) {
+func (s *Service) Publish(topic string, record map[string]interface{}, attributes map[string]string) (string, error) {
 	publishID, publishErr := util.PubSubTopicPublish(s.Context(), util.PubSubTopicID(s.Namespace(), topic), record, attributes)
 	if publishErr != nil {
-		logger.Errorf(s.Context(), "application service", "failed to publish record created %s", publishErr.Error())
+		logger.Errorf(s.Context(), "service service", "failed to publish record created %s", publishErr.Error())
+		return "", publishErr
 	}
-	logger.Debugf(s.Context(), "application service", "published record created, publish id %s", publishID)
+	logger.Debugf(s.Context(), "service service", "published record created, publish id %s", publishID)
+	return publishID, nil
 }

@@ -52,6 +52,30 @@ func StringToInt64(subject string) int64 {
 	return 0
 }
 
+//StringToFloat64 converts a string to a floating point 64 bit
+func StringToFloat64(subject string) float64 {
+	if subject != "" {
+		i, err := strconv.ParseFloat(subject, 64)
+		if err != nil {
+			return 0
+		}
+		return i
+	}
+	return 0
+}
+
+//StringToFloat32 converts a string to a floating point 32 bit
+func StringToFloat32(subject string) float64 {
+	if subject != "" {
+		i, err := strconv.ParseFloat(subject, 32)
+		if err != nil {
+			return 0
+		}
+		return i
+	}
+	return 0
+}
+
 //ToString Converts interface to a string
 func ToString(subject interface{}) string {
 
@@ -73,11 +97,12 @@ func ToString(subject interface{}) string {
 	return ""
 }
 
+//NumberizeString converts string to either int or float
 func NumberizeString(subject interface{}) interface{} {
 	if govalidator.IsInt(subject.(string)) {
 		return StringToInt(subject.(string))
 	} else if govalidator.IsFloat(subject.(string)) {
-		return StringToInt64(subject.(string))
+		return StringToFloat64(subject.(string))
 	}
 	return subject
 }

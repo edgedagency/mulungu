@@ -13,4 +13,5 @@ const (
 	HeaderTenantID                  = "X-Authorised-Tenant-ID"
 	HeaderEnvironment               = "X-Environment"
 	HeaderServiceHost               = "X-Service-Host"
+	HeaderRequestSource             = "X-Request-Source"
 )
